@@ -202,6 +202,12 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
       {file.status === 'transform-error' && file.transformError && (
         <p className="px-3 pb-2 font-mono text-[11px] text-ai">{file.transformError}</p>
       )}
+
+      {/* Phase 5: rate-limit policy block — status stays 'analyzed' so the
+          Transform button remains for a retry once the window resets. */}
+      {file.rateLimit && (
+        <p className="px-3 pb-2 font-mono text-[11px] text-unsure">{file.rateLimit.message}</p>
+      )}
     </div>
   )
 }

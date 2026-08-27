@@ -11,6 +11,9 @@ import {
 } from './reducer'
 import { runTransform } from '../transform'
 import type { StripFn } from '../transform'
+import { checkRateLimit, formatRetryAfter } from '../ratelimit'
+import type { RateLimitChecker } from '../ratelimit'
+import { showToast } from '../toast'
 
 interface BatchState {
   files: BatchFile[]
@@ -28,10 +31,19 @@ interface BatchState {
 
   /**
    * Trigger the Phase 3 transform pipeline for a single file.
-   * The file must be in 'analyzed' status. Runs strip → verify → rewrite
-   * and commits the result to state atomically. No-ops if already transforming.
+   * The file must be in 'analyzed' status. Phase 5: a /api/check-limit
+   * check runs FIRST — on denial the transform is not attempted, the file
+   * keeps 'analyzed' status with a `rateLimit` flag, and a toast explains
+   * the retry-after time. Runs strip → verify → rewrite and commits the
+   * result to state atomically. No-ops if already transforming.
+   * `_checkLimit` is the test/verify-only override (same pattern as
+   * transformAllSerial's `_stripFn`) — the UI always calls with id only.
    */
-  triggerTransform: (id: string) => Promise<void>
+  triggerTransform: (
+    id: string,
+    _stripFn?: StripFn,
+    _checkLimit?: RateLimitChecker,
+  ) => Promise<void>
 
   /**
    * Phase 4: transform every file currently in 'analyzed' status — serially,
@@ -39,10 +51,18 @@ interface BatchState {
    * than analysis, and predictable sequential execution is easier to follow
    * in the UI and debug). Each file's status updates live as it completes.
    * A failure marks that one file 'transform-error' and the run continues.
-   * No-ops while a run is already in flight. `_stripFn` is the run.ts
-   * test/verify-only override — the UI always calls this with no arguments.
+   * Phase 5: each file also consumes one rate-limit slot (N files = N
+   * check-and-increment calls, see AGENT.md "Batch request counting"); when
+   * the server denies mid-batch, the run STOPS at that file — remaining
+   * files keep 'analyzed' status untouched — and one toast covers the whole
+   * interruption. No-ops while a run is already in flight. `_stripFn` is the
+   * run.ts test/verify-only override; `_checkLimit` overrides the
+   * /api/check-limit call. The UI always calls this with no arguments.
    */
-  transformAllSerial: (_stripFn?: StripFn) => Promise<void>
+  transformAllSerial: (
+    _stripFn?: StripFn,
+    _checkLimit?: RateLimitChecker,
+  ) => Promise<void>
 
   /** True while a transformAllSerial() run is in flight (drives UI disable). */
   isTransformingAll: boolean
@@ -81,22 +101,50 @@ export const useBatchStore = create<BatchState>((set, get) => {
 
   /**
    * Shared Phase 3/4 transform core for one file: guard on 'analyzed' status,
-   * run strip → verify → rewrite, commit atomically (or fail atomically).
-   * Used by both triggerTransform() (single card button) and
-   * transformAllSerial() (batch run). `stripFn` is the test-only override.
+   * Phase-5 rate-limit gate, then strip → verify → rewrite, committed
+   * atomically (or failed atomically). Used by triggerTransform() (single
+   * card button) and transformAllSerial() (batch run). `stripFn` and
+   * `checkLimit` are the test-only overrides.
+   *
+   * Returns what the batch loop needs to know about the rate-limit gate:
+   *   - { blocked: true, retryAfterSeconds } — denied; the file keeps
+   *     'analyzed' status + a `rateLimit` flag and the caller must stop.
+   *   - { blocked: false } — allowed (or file no-op'd / transform finished).
    */
-  const transformOne = async (id: string, stripFn?: StripFn) => {
+  const transformOne = async (
+    id: string,
+    stripFn?: StripFn,
+    checkLimit: RateLimitChecker = checkRateLimit,
+  ): Promise<{ blocked: boolean; retryAfterSeconds: number | null }> => {
     const batchFile = useBatchStore.getState().files.find((f) => f.id === id)
     // Guard: only transform from analyzed status (also no-ops when the file
     // was removed mid-run).
-    if (!batchFile || batchFile.status !== 'analyzed') return
+    if (!batchFile || batchFile.status !== 'analyzed')
+      return { blocked: false, retryAfterSeconds: null }
+
+    // Phase 5 gate: check-and-increment BEFORE any transform work. A denial
+    // is a policy block, not a transform failure — status stays 'analyzed'
+    // so the button remains for a post-reset retry.
+    patchFile(id, { rateLimit: undefined })
+    const decision = await checkLimit()
+    if (!decision.allowed) {
+      patchFile(id, {
+        rateLimit: {
+          retryAfterSeconds: decision.retryAfterSeconds,
+          resetAt: decision.resetAt,
+          message: decision.message,
+        },
+      })
+      showToast(decision.message, 'warn')
+      return { blocked: true, retryAfterSeconds: decision.retryAfterSeconds }
+    }
 
     useBatchStore.getState()._startTransform(id)
     const result = await runTransform(batchFile, stripFn)
 
     if (!result.ok) {
       useBatchStore.getState()._failTransform(id, result.error)
-      return
+      return { blocked: false, retryAfterSeconds: null }
     }
 
     // Create a preview object URL for the transformed blob.
@@ -110,6 +158,7 @@ export const useBatchStore = create<BatchState>((set, get) => {
         transformedThumbUrl,
         result.note,
       )
+    return { blocked: false, retryAfterSeconds: null }
   }
 
   return {
@@ -185,11 +234,13 @@ export const useBatchStore = create<BatchState>((set, get) => {
 
     // ── Phase 3 transform actions ──────────────────────────────────────────────
 
-    triggerTransform: async (id) => transformOne(id),
+    triggerTransform: async (id, _stripFn, _checkLimit) => {
+      await transformOne(id, _stripFn, _checkLimit)
+    },
 
     // ── Phase 4 batch orchestration ────────────────────────────────────────────
 
-    transformAllSerial: async (_stripFn) => {
+    transformAllSerial: async (_stripFn, _checkLimit) => {
       // Re-entrancy guard: one batch run at a time.
       if (get().isTransformingAll) return
       set({ isTransformingAll: true })
@@ -204,8 +255,19 @@ export const useBatchStore = create<BatchState>((set, get) => {
         // Serial, in array order — no Promise.all / worker pool here on
         // purpose (see interface doc). One file failing does not stop the
         // rest: transformOne marks it 'transform-error' and we continue.
-        for (const id of ids) {
-          await transformOne(id, _stripFn)
+        // Phase 5: a rate-limit DENIAL does stop the run — the quota is
+        // spent, so hitting 429 for every remaining file would just burn
+        // time; instead one toast covers the whole batch interruption.
+        for (const [index, id] of ids.entries()) {
+          const gate = await transformOne(id, _stripFn, _checkLimit)
+          if (gate.blocked) {
+            const retryIn = formatRetryAfter(gate.retryAfterSeconds ?? 0)
+            showToast(
+              `Rate limit reached — ${index} of ${ids.length} photos cleaned. The rest will keep their original metadata until you retry in ${retryIn}.`,
+              'warn',
+            )
+            break
+          }
         }
       } finally {
         set({ isTransformingAll: false })
@@ -237,6 +299,7 @@ export const useBatchStore = create<BatchState>((set, get) => {
                   outputFormat,
                   transformedThumbUrl: thumbUrl,
                   transformNote: note,
+                  rateLimit: undefined,
                 }
               : f,
           ),
@@ -245,7 +308,7 @@ export const useBatchStore = create<BatchState>((set, get) => {
     },
 
     _failTransform: (id, error) =>
-      patchFile(id, { status: 'transform-error', transformError: error }),
+      patchFile(id, { status: 'transform-error', transformError: error, rateLimit: undefined }),
 
     _setStatus: setStatus,
     _setMetadata: setMetadata,

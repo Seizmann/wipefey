@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import { Logo } from './Logo'
+import { Toasts } from './Toast'
 import { useTheme } from '../hooks/useTheme'
 
 const NAV = [
@@ -66,6 +67,9 @@ export function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      {/* Phase 5: single minimal toast host (rate-limit messages etc.). */}
+      <Toasts />
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">

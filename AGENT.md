@@ -21,7 +21,8 @@ rewrite metadata → download. See `REQUIREMENT.md` (authoritative scope) and
 - **Metadata write:** [piexifjs](https://github.com/hMatoba/piexifjs) **pinned exactly `1.0.4`** (JPEG EXIF) + custom PNG chunk writer.
 - **ZIP:** [fflate](https://github.com/101arrowz/fflate).
 - **Fonts:** `@fontsource/geist` + `@fontsource/geist-mono` (self-hosted, OFL).
-- **Rate limiting:** Vercel serverless `api/check-limit.mjs` + Upstash Redis (`@upstash/ratelimit`).
+- **Rate limiting:** Vercel serverless `api/check-limit.mjs` + Upstash Redis (`@upstash/redis`
+  REST client + own pure fixed-window core in `api/ratelimit-core.mjs`).
 - **Meta/per-route head:** react-helmet-async.
 
 ## Non-negotiables
@@ -61,7 +62,44 @@ HTML per route. Documented here because it departs from the original plan.
 
 Free tier: 256MB storage, 500K commands/month (≈16K/day), 10GB bandwidth. Tenant per-IP
 counters at 10 req/hr are far under this. Vercel KV has been folded into Vercel's paid
-storage platform with a less predictable free tier. Backing via `@upstash/ratelimit`.
+storage platform with a less predictable free tier.
+
+**Phase 5 refinements (final shape):**
+- **Client:** `@upstash/redis` (plain REST client), NOT `@upstash/ratelimit`. The window
+  math is ~30 lines; owning it in `api/ratelimit-core.mjs` (pure, dependency-free) lets
+  `verify:phase5` unit-test window/reset/retry-after logic in Node with a fake in-memory
+  counter — no mock Redis client is baked into production code, and the production path
+  stays the real REST client.
+- **Algorithm: fixed-window counter**, 10 req/hour per IP, key
+  `wipefey:ratelimit:<windowIndex>:<ip>`, INCR + EXPIRE-on-first-hit. **Tradeoff accepted:**
+  a client can burst up to 2× limit across a window boundary (10 at 09:59 + 10 at 10:00).
+  A sliding-window (zset/log) would double Redis commands per request for precision a free
+  client-side metadata tool does not need. Fixed window is simpler, cheaper, trivially
+  testable.
+- **Batch request counting: N requests, one per file.** `transformAllSerial()` calls
+  check-and-increment once per file it transforms, not once per batch. Rationale:
+  REQUIREMENT.md §5.5 caps *transformations* per hour, not button presses; a 50-file
+  batch counted as 1 would let one user consume 500 transforms/hour. The cost: a large
+  batch can hit the limit partway — handled by stopping the run cleanly (below).
+- **Batch interruption:** on a 429 mid-batch the run stops at that file (remaining files
+  keep 'analyzed' status untouched — no repeated 429 hammering), the blocked file gets a
+  `rateLimit` flag (policy block, NOT `transform-error`; status stays 'analyzed' so the
+  Transform button remains for a post-reset retry), and one toast covers the whole
+  interruption ("3 of 5 photos cleaned… retry in 42 minutes").
+- **Frontend failure semantics: fail OPEN.** Anything other than a well-formed 200/429
+  (network error, 5xx, malformed body) → transform proceeds (`degraded: true`). The
+  pipeline is fully client-side; a policy gate must not hard-block the tool when its own
+  infra is down. Documented in `src/lib/ratelimit/index.ts`. Last-known `remaining: 0`
+  is cached until `resetAt` to avoid hammering the endpoint.
+- **Backend failure semantics: fail LOUD.** Missing/empty `UPSTASH_REDIS_REST_URL`/`_TOKEN`
+  → explicit 500 `{ code: 'misconfigured' }` with a descriptive error (never a silent
+  allow-all, which would make the limit invisibly vanish in production). Upstash command
+  error → 500 `{ code: 'upstream-error' }`. The frontend's fail-open turns either into a
+  degraded-allow, so real users are unaffected while logs/monitoring show the failure.
+- **IP extraction:** Vercel sets `x-forwarded-for` on function requests (verified against
+  vercel.com/docs/headers/request-headers, 2025-12); leftmost value = original client.
+  Fallback `x-real-ip`, then a shared `unknown` bucket (missing header ⇒ one shared fair
+  counter, not a bypass).
 
 ### D3 — fflate replaces JSZip
 
@@ -114,13 +152,21 @@ new blob (abort on any metadata leak) → rewrite (piexifjs for JPEG, custom wri
 
 ## Rate-limit contract (Phase 5)
 
-`POST /api/check-limit`:
-- `200` → `{ allowed:true, ip, limit:10, remaining, resetAt }`
-- `429` → `{ allowed:false, limit:10, remaining:0, resetAt }`
-- IP from Vercel `x-forwarded-for`. Fixed-window 10/hr per IP via `@upstash/ratelimit`.
+`POST /api/check-limit` (fixed-window 10 req/hour per IP, Upstash Redis via `@upstash/redis`):
+- `200` → `{ allowed:true, ip, limit:10, remaining, resetAt, retryAfter:0 }`
+- `429` → `{ allowed:false, ip, limit:10, remaining:0, resetAt, retryAfter:<seconds>, message }`
+  + `Retry-After` header
+- `405` → non-POST. `500` → `{ allowed:false, code:'misconfigured'|'upstream-error', error }`.
+- `resetAt` is epoch MILLISECONDS; `retryAfter` is SECONDS.
 
-Frontend calls this before allowing a transform; on 429 show a toast + inline retry countdown
-and disable Transform until `resetAt`. Cache the last response in-memory.
+Frontend gate (`src/lib/ratelimit/index.ts`): called once per intended transform
+(single-file button AND each iteration of Transform-all). On 429: no transform attempt,
+file keeps 'analyzed' + `rateLimit` flag, toast + inline card message with the formatted
+retry-after time; mid-batch the run stops and one toast covers the interruption. Fail-open
+on any non-contract response (see D2). Cached `remaining: 0` denies locally until `resetAt`.
+Pure core (window math / decision / IP extraction) lives in `api/ratelimit-core.mjs` and is
+unit-tested by `verify:phase5` against a fake in-memory counter — live Upstash integration
+is UNTESTED end-to-end (no real credentials yet; known Phase-5 gap, see PROGRESS.md).
 
 ## Environment variables
 

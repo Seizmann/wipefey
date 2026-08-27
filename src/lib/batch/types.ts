@@ -54,6 +54,22 @@ export interface BatchFile {
    * extension (e.g. HEIC input → outputFormat 'jpeg' → photo.jpg).
    */
   outputFormat?: ImageFormat
+
+  // ── Phase 5 additions ─────────────────────────────────────────────────────
+  /**
+   * Set when /api/check-limit DENIED a transform (per-IP rate limit, 10/hr).
+   * This is a policy block, NOT a transform failure: status deliberately
+   * stays 'analyzed' so the Transform button remains and the user can retry
+   * once the window resets. Cleared at the start of every transform attempt.
+   */
+  rateLimit?: {
+    /** Seconds until the hourly window resets (from the 429 / cache). */
+    retryAfterSeconds: number
+    /** Epoch ms when the window resets. */
+    resetAt: number
+    /** Human message including the formatted retry-after time. */
+    message: string
+  }
 }
 
 export const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
