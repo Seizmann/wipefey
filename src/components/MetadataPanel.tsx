@@ -5,6 +5,7 @@ import type {
   PngTextChunk,
 } from '../lib/metadata/unified'
 import type { BatchFile } from '../lib/batch/types'
+import { MarkersView } from './MarkersView'
 
 function formatValue(v: unknown): string {
   if (v === null || v === undefined) return '—'
@@ -203,6 +204,10 @@ export function MetadataPanel({ file }: Props) {
         </p>
       ) : null}
 
+      {/* ── AI-generation heuristic (Phase 2) ── */}
+      <MarkersView metadata={meta} />
+
+      {/* ── Raw metadata categories ── */}
       {sections.length === 0 ? (
         <p className="rounded-[8px] border border-border bg-surface p-5 font-mono text-xs text-muted">
           No readable metadata found in this file.

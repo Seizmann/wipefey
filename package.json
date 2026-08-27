@@ -11,6 +11,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "verify:phase1": "esbuild scripts/verify-phase1.ts --bundle --platform=node --format=cjs --outfile=.verify/verify.cjs && node .verify/verify.cjs",
+    "verify:phase2": "esbuild scripts/verify-phase2.ts --bundle --platform=node --format=cjs --outfile=.verify/verify-phase2.cjs && node .verify/verify-phase2.cjs",
     "prerender": "node scripts/prerender.mjs",
     "build:static": "tsc -b && vite build && node scripts/prerender.mjs"
   },
