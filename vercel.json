@@ -3,10 +3,5 @@
   "buildCommand": "npm run build:static",
   "outputDirectory": "dist",
   "framework": "vite",
-  "functions": {
-    "api/check-limit.mjs": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }

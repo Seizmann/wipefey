@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "description": "Wipefey by RexiO — client-side photo metadata stripper + AI-generation marker heuristic. Free, open source, MIT.",
   "license": "MIT",
   "repository": {
