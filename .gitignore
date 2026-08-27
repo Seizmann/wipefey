@@ -31,3 +31,4 @@ npm-debug.log*
 PROGRESS.md
 REQUIREMENT.md
 .verify/
+.prerender-tmp-*

@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const tmp = mkdtempSync(join(root, '.verify', 'prerender-'))
+const tmp = mkdtempSync(join(root, '.prerender-tmp-'))
 
 try {
   await build({
