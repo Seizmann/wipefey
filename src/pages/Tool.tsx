@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { DropZone } from '../components/DropZone'
 import { FileCard } from '../components/FileCard'
 import { MetadataPanel } from '../components/MetadataPanel'
+import { Seo } from '../seo/Seo'
+import { getRouteMeta } from '../seo/meta'
 import { useBatchStore } from '../lib/batch/state'
 import { MAX_FILE_COUNT, ANALYZE_CONCURRENCY } from '../lib/batch/types'
 import {
@@ -17,6 +19,7 @@ import {
  * batch run + per-file download + Download-all-as-ZIP export.
  */
 export function ToolPage() {
+  const meta = getRouteMeta('/tool')
   const files = useBatchStore((s) => s.files)
   const selectedId = useBatchStore((s) => s.selectedId)
   const selectFile = useBatchStore((s) => s.selectFile)
@@ -55,6 +58,7 @@ export function ToolPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <Seo path={meta.path} title={meta.title} description={meta.description} />
       <header className="mb-8">
         <h1 className="font-mono text-2xl font-semibold text-foreground">
           Inspect your photos

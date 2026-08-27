@@ -1,0 +1,60 @@
+# Wipefey
+
+Wipefey is a free, open-source, client-side metadata stripper and AI-generation heuristic detector for photos. The tool operates 100% locally within the browser, ensuring photo privacy.
+
+- **URL**: https://wipefey.rexio.pro
+- **Repository**: https://github.com/Seizmann/wipefey
+- **License**: MIT
+- **Created By**: Mohammad Sijan (https://sijan.pro.bd)
+- **Product Family**: RexiO (https://rexio.pro)
+- **Publisher**: SpritexAI (https://spritexai.pro.bd)
+
+## System Architecture
+
+Wipefey is a React single-page application built on Vite and TypeScript. All processing runs in the user's browser tab.
+
+```mermaid
+[Upload Image] 
+      │
+      ▼
+[Analyze Metadata] (exifr + custom PNG reader)
+      │
+      ├─► [AI Marker Heuristics] (Yes/No/Uncertain badge)
+      │
+      ▼
+[Transform/Clean] (HTML5 Canvas re-encode)
+      │
+      ▼
+[Verify Strip] (confirm 0 metadata leaks)
+      │
+      ▼
+[Rewrite Metadata] (piexifjs + custom PNG writer)
+      │
+      ▼
+[Download Cleaned Blob/ZIP] (fflate for ZIP packing)
+```
+
+## Key Capabilities
+
+1. **Metadata Reader**: Parses and displays EXIF, IPTC, XMP, ICC profile data, GPS coords, and PNG textual chunks (`tEXt`/`iTXt`/`zTXt`).
+2. **AI-Generation Badge Heuristic**:
+   - Matches known machine-generation signatures (e.g., Stable Diffusion parameters, Midjourney/DALL-E software tags, C2PA contentcredentials).
+   - Returns a data-backed badge: `Yes` (strong indicators), `No` (none found, does not prove authenticity), or `Uncertain` (inconclusive findings).
+3. **Metadata Stripping**: Utilizes offscreen canvas drawing to completely discard existing binary meta streams.
+4. **Metadata Re-injection**: Re-writes a clean, standard EXIF format containing only the current UTC timestamp and the tag `Software: Wipefey by RexiO`.
+5. **Batch ZIP Packaging**: Processes up to 50 files concurrently and bundles results in a direct-to-download ZIP archive.
+
+## Routes & Pages
+
+- `/` (Home): Landing page explaining the tool's core premise, features, and privacy model.
+- `/tool` (Tool Workbench): The primary reactive workspace containing the drag-and-drop zone, file cards, parallel analysis queue, metadata explorer, and transformation actions.
+- `/how-it-works` (Mechanism): Detailed technical breakdown of the canvas-based stripping, heuristic checks, and fail-open rate limiting.
+- `/about` (Scope & Authors): Background details of Sijan (creator), SpritexAI (publisher), and the RexiO product family.
+- `/privacy` (Data Policy): Explicit statement of client-side-only storage patterns and IP-keyed Upstash Redis rate-limit checks.
+
+## Rate Limiting API
+
+- **Endpoint**: `POST /api/check-limit`
+- **Utility**: Keeps track of transaction counts to protect hosting boundaries (roughly 10 requests/hour/IP).
+- **Format**: Returns JSON with current rate-limit counters.
+- **Fail-Open Policy**: If the endpoint fails or returns a `500` status, the frontend ignores the check and allows local image processing to proceed. File contents are never transmitted.

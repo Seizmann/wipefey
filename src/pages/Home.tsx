@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Logo } from '../components/Logo'
+import { Seo } from '../seo/Seo'
+import { getRouteMeta } from '../seo/meta'
 
 /**
  * Landing page — what Wipefey does, why it matters (privacy: no server-side
@@ -35,8 +37,10 @@ const FEATURES = [
 ]
 
 export function HomePage() {
+  const meta = getRouteMeta('/')
   return (
     <>
+      <Seo path={meta.path} title={meta.title} description={meta.description} jsonLd />
       {/* Hero — the only place a gradient appears (DESIGN.md §1/§4). */}
       <section className="relative overflow-hidden">
         <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden />

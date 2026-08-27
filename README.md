@@ -1,109 +1,112 @@
 <p align="center">
-  <img src="./public/favicon.svg" width="72" height="72" alt="Wipefey logo" />
+  <a href="https://wipefey.rexio.pro">
+    <img src="./public/favicon.svg" width="96" height="96" alt="Wipefey Logo" />
+  </a>
+</p>
+
+<h1 align="center">Wipefey</h1>
+
+<p align="center">
+  Inspect photo metadata, detect AI-generation markers, and wipe it all clean — 100% in your browser.
 </p>
 
 <p align="center">
-  <strong>Wipefey</strong> — see the hidden metadata in your photos, detect AI-generation markers, and wipe it all clean. <em>100% in your browser.</em>
-</p>
-
-<p align="center">
-  <a href="https://wipefey.rexio.pro">wipefey.rexio.pro</a> ·
-  <a href="https://rexio.pro">RexiO</a> ·
-  <a href="https://spritexai.pro.bd">SpritexAI</a> ·
-  <a href="https://github.com/Seizmann/wipefey">GitHub</a>
-</p>
-
-<p align="center">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-green" />
-  <img alt="Build" src="https://img.shields.io/badge/build-Vite%20%2B%20React%20%2B%20TS-blue" />
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" /></a>
+  <a href="https://wipefey.rexio.pro"><img src="https://img.shields.io/badge/Live%20Demo-wipefey.rexio.pro-0066f3.svg" alt="Live Demo" /></a>
 </p>
 
 ---
 
-**Wipefey** is a free, open-source, client-side tool that lets you upload one or
-more photos, inspect every piece of metadata embedded in them (EXIF, IPTC, XMP,
-GPS, PNG text chunks), get a best-effort signal on whether the image looks
-AI-generated, and then "transform" the file — stripping all existing metadata
-and writing fresh metadata (current date/time + `Software: Wipefey by RexiO`)
-in its place.
+Wipefey is a free, open-source, client-side metadata utility for photos. It extracts and displays hidden metadata, checks for known AI-generation indicator tags, and processes the image to clean it. Wipefey is built for privacy-conscious users who want to review what information their images carry before sharing them online.
 
-No sign-up. No server-side storage. **Your photos never leave your device.**
+No registrations. No server uploads. **Your photos never leave your device.**
 
 ## Features
 
-- **Full metadata inspection** — EXIF, IPTC, XMP, ICC, GPS, and PNG `tEXt`/`iTXt`/`zTXt` text chunks, all parsed in-browser.
-- **AI-generation marker heuristic** — checks known markers (XMP `dc:creator`, C2PA content-credential blocks, PNG text-chunk keys like `parameters`/`prompt`, EXIF `Software` tags, and more) and reports a **Yes / Uncertain / No** badge with honest, non-certainty framing. This is a heuristic, never proof.
-- **One-click transform** — strips every piece of existing metadata via canvas re-encode, then rewrites the file with only the current timestamp and the Wipefey stamp.
-- **Batch processing** — handle up to 50 files at once (25MB each), with per-file and ZIP download.
-- **Private by design** — everything runs in your browser; the only server call is a single rate-limit check.
+- **Metadata Inspection**: Reads and displays EXIF (camera make, model, timestamps, exposure, software), IPTC, XMP, GPS coordinates, and PNG text chunks (`tEXt`/`iTXt`/`zTXt`).
+- **AI-Generation Badge Heuristic**: Scans metadata for known generator signatures (e.g., Stable Diffusion parameters, Midjourney/DALL-E software stamps, and C2PA content credentials) to output a **Yes / Uncertain / No** badge with raw tag evidence.
+- **One-Click Clean/Transform**: Strips all metadata by re-encoding the image onto an HTML5 Canvas, verifies the strip, and rewrites the file with only the current timestamp and a clean "Wipefey by RexiO" stamp.
+- **Batch Processing**: Drag and drop up to 50 images at once (up to 25 MB per file) with parallel inspection.
+- **ZIP Bundler**: Package and download all cleaned images as a single, compressed `.zip` file using non-blocking, browser-based compression.
+- **System-Matching Theme**: Remembers your light or dark mode preference across sessions via localStorage.
 
-## How it works
+## Live Demo
 
-1. **Upload** — drag-and-drop or browse (JPEG, PNG, WebP, HEIC best-effort; up to 50 files, ~25MB each).
-2. **Inspect** — Wipefey reads and displays all available metadata per file.
-3. **Signal** — a heuristic badge shows whether known AI-generation markers were found (clearly labeled as heuristic, not conclusive).
-4. **Transform** — strip all metadata, write current date/time + `Software: Wipefey by RexiO`, verify the strip, and reveal the new file for download.
+Run the stable production build at: **[wipefey.rexio.pro](https://wipefey.rexio.pro)**
 
-## Tech stack
+## Tech Stack
 
 | Layer | Choice |
 |---|---|
-| Framework | React + Vite + TypeScript (strict mode) |
-| Styling | Tailwind CSS (Geist-style design system — see `DESIGN.md`) |
-| Metadata extraction | [exifr](https://github.com/MikeKovarik/exifr) + custom PNG chunk reader |
-| Metadata rewriting | [piexifjs](https://github.com/hMatoba/piexifjs) (pinned 1.0.4) + custom PNG chunk writer |
-| Batch ZIP | [fflate](https://github.com/101arrowz/fflate) |
-| State | Zustand |
-| Rate limiting | Vercel serverless function + Upstash Redis |
-| Fonts | Geist Sans / Geist Mono (self-hosted, OFL) |
+| Core Framework | React 19 + Vite 8 + TypeScript (Strict Mode) |
+| Styling / Design | Tailwind CSS v4 (achromatic Vercel/Geist-style design tokens) |
+| Metadata Extraction | `exifr` + custom PNG chunk reader |
+| Metadata Rewriting | `piexifjs` (v1.0.4) + custom PNG chunk writer |
+| Compression / ZIP | `fflate` |
+| State Management | `zustand` |
+| Shell / Router | `react-router-dom` v7 |
+| Search Engine / SEO | `react-helmet-async` for page meta; static pre-renderer for crawler indexability |
+| Rate Limiting | Serverless Edge Function (Vercel) + Upstash Redis |
 
-## Local development
+## Local Development
 
+Follow these steps to set up and run Wipefey locally.
+
+### 1. Prerequisites
+Ensure you have Node.js (v18+) and npm installed.
+
+### 2. Clone and Install
 ```bash
+git clone https://github.com/Seizmann/wipefey.git
+cd wipefey
 npm install
-npm run dev        # start the dev server
-npm run build      # type-check + production build
-npm run preview    # preview the production build
-npm run build:static  # build + pre-render static routes (see scripts/prerender.mjs)
 ```
 
-The Vite frontend is fully static. The optional `api/check-limit.mjs` serverless
-function is only used for rate limiting in production.
-
-## Project structure
-
+### 3. Environment Setup (Optional)
+Wipefey uses Upstash Redis for serverless rate limiting in production. Copy the example file and fill in your credentials to run rate-limiting queries locally:
+```bash
+cp .env.example .env
 ```
-api/                 Vercel serverless function (rate limiting)
-public/              Static assets: favicon, robots, sitemap
-scripts/             Pre-render helper for static SEO
-src/
-  components/        UI components
-  design/            Design tokens (Tailwind v4 CSS-first)
-  hooks/             useTheme, useDropzone, useRateLimit
-  lib/
-    metadata/        EXIF/IPTC/XMP extraction + PNG chunk reader
-    ai-heuristics/   AI-marker registry + badge rules
-    transform/       Canvas strip + metadata rewrite
-    batch/           Per-file state machine
-    zip/             fflate ZIP bundling
-  pages/             Home, Tool, HowItWorks, About, Privacy
-  seo/               Meta/JSON-LD builders
+*Note: If `.env` is unconfigured, the rate limit API function will fail-open so that the client-side tool continues working unimpeded.*
+
+### 4. Running Commands
+```bash
+# Start local Vite development server
+npm run dev
+
+# Lint code using oxlint
+npm run lint
+
+# Compile TypeScript and build production SPA assets
+npm run build
+
+# Build production assets and prerender static pages for search engines
+npm run build:static
+
+# Preview production build locally
+npm run preview
 ```
 
-## Documentation
+## How It Works
 
-- [`REQUIREMENT.md`](./REQUIREMENT.md) — product requirements (v1 scope, authoritative)
-- [`DESIGN.md`](./DESIGN.md) — full design system (colors, typography, spacing, components)
-- [`AGENT.md`](./AGENT.md) — agent-facing notes: architecture decisions, conventions
-- [`ROADMAP.md`](./ROADMAP.md) — current v1 scope + v2 plans
-- [`CLAUDE.md`](./CLAUDE.md) — working instructions for AI coding agents
+Wipefey's asset transformation runs entirely client-side. When you trigger a transform:
+1. **HTML5 Canvas Re-Encode**: The browser draws the uploaded image to an offscreen Canvas element and exports it to a fresh JPEG or PNG blob. This native step discards all metadata.
+2. **Post-Strip Verification**: The script reads the new blob to confirm that no metadata remains.
+3. **Structured Write**: The metadata engine injects empty EXIF header templates, replacing timestamps with the current clock time and writing `Software: Wipefey by RexiO` as the sole software tag.
+4. **Output Render**: The object URL is replaced, and the final image is made available for download.
+
+*Note: Since web browsers do not support native encoding of HEIF/HEIC, uploading an HEIC file will convert and download the final cleaned file as a JPEG.*
 
 ## Contributing
 
-Contributions are welcome. Please open an issue or pull request. Keep TypeScript
-strict and run `npm run lint` before submitting.
+Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on code style, commit standards, and the pull request submission process. Keep TypeScript strict (`tsc -b`) and lint free before submitting any code.
+
+## Project Family & Credits
+
+- **Creator**: [Mohammad Sijan](https://sijan.pro.bd) — founder of RexiO.
+- **Product Family**: part of the [RexiO](https://rexio.pro) family of open-source utilities.
+- **Publisher**: [SpritexAI](https://spritexai.pro.bd) under its Open Source Tools catalog.
 
 ## License
 
-MIT © [SpritexAI](https://spritexai.pro.bd). Part of the [RexiO](https://rexio.pro)
-family of open-source tools by [Mohammad Sijan](https://sijan.pro.bd).
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.

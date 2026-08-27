@@ -8,6 +8,8 @@
  * Facts cross-checked against src/lib/ratelimit/index.ts and
  * api/check-limit.mjs / api/ratelimit-core.mjs.
  */
+import { Seo } from '../seo/Seo'
+import { getRouteMeta } from '../seo/meta'
 import type { ReactNode } from 'react'
 
 function Section({
@@ -30,8 +32,10 @@ function Section({
 }
 
 export function PrivacyPage() {
+  const meta = getRouteMeta('/privacy')
   return (
     <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
+      <Seo path={meta.path} title={meta.title} description={meta.description} />
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
         Privacy
       </h1>

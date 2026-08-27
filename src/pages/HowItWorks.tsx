@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { Seo } from '../seo/Seo'
+import { getRouteMeta } from '../seo/meta'
 
 /**
  * How it works — the real pipeline (upload → extract → heuristic → transform →
@@ -36,8 +38,10 @@ const STEPS = [
 ]
 
 export function HowItWorksPage() {
+  const meta = getRouteMeta('/how-it-works')
   return (
     <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
+      <Seo path={meta.path} title={meta.title} description={meta.description} />
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
         How it works
       </h1>

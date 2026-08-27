@@ -4,6 +4,8 @@
  * created by Mohammad Sijan (sijan.pro.bd). Name + link + role only — no
  * invented biographical details.
  */
+import { Seo } from '../seo/Seo'
+import { getRouteMeta } from '../seo/meta'
 
 const PEOPLE = [
   {
@@ -27,8 +29,10 @@ const PEOPLE = [
 ]
 
 export function AboutPage() {
+  const meta = getRouteMeta('/about')
   return (
     <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
+      <Seo path={meta.path} title={meta.title} description={meta.description} />
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
         About
       </h1>
