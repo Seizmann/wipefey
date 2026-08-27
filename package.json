@@ -13,6 +13,7 @@
     "verify:phase1": "esbuild scripts/verify-phase1.ts --bundle --platform=node --format=cjs --outfile=.verify/verify.cjs && node .verify/verify.cjs",
     "verify:phase2": "esbuild scripts/verify-phase2.ts --bundle --platform=node --format=cjs --outfile=.verify/verify-phase2.cjs && node .verify/verify-phase2.cjs",
     "verify:phase3": "esbuild scripts/verify-phase3.ts --bundle --platform=node --format=cjs --outfile=.verify/verify-phase3.cjs && node .verify/verify-phase3.cjs",
+    "verify:phase4": "esbuild scripts/verify-phase4.ts --bundle --platform=node --format=cjs --outfile=.verify/verify-phase4.cjs && node .verify/verify-phase4.cjs",
     "prerender": "node scripts/prerender.mjs",
     "build:static": "tsc -b && vite build && node scripts/prerender.mjs"
   },
@@ -35,6 +36,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "esbuild": "^0.28.2",
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",

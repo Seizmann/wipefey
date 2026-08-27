@@ -1,4 +1,4 @@
-import type { ImageMetadata } from '../metadata/unified'
+import type { ImageFormat, ImageMetadata } from '../metadata/unified'
 
 /**
  * Per-file state machine:
@@ -46,6 +46,14 @@ export interface BatchFile {
    * Or "HEIC was converted to JPEG for compatibility."
    */
   transformNote?: string
+
+  // ── Phase 4 additions ─────────────────────────────────────────────────────
+  /**
+   * Actual output format of the transform (run.ts format contract). Committed
+   * alongside the blob by _finishTransform. Drives the download filename
+   * extension (e.g. HEIC input → outputFormat 'jpeg' → photo.jpg).
+   */
+  outputFormat?: ImageFormat
 }
 
 export const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB

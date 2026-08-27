@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { ImageMetadata } from '../metadata/unified'
+import type { ImageFormat, ImageMetadata } from '../metadata/unified'
 import { extractImageMetadata } from '../metadata'
 import type { BatchFile, FileStatus } from './types'
 import { ANALYZE_CONCURRENCY } from './types'
@@ -10,6 +10,7 @@ import {
   type Rejection,
 } from './reducer'
 import { runTransform } from '../transform'
+import type { StripFn } from '../transform'
 
 interface BatchState {
   files: BatchFile[]
@@ -32,6 +33,20 @@ interface BatchState {
    */
   triggerTransform: (id: string) => Promise<void>
 
+  /**
+   * Phase 4: transform every file currently in 'analyzed' status — serially,
+   * one file at a time, in array order (intentional: transform is heavier
+   * than analysis, and predictable sequential execution is easier to follow
+   * in the UI and debug). Each file's status updates live as it completes.
+   * A failure marks that one file 'transform-error' and the run continues.
+   * No-ops while a run is already in flight. `_stripFn` is the run.ts
+   * test/verify-only override — the UI always calls this with no arguments.
+   */
+  transformAllSerial: (_stripFn?: StripFn) => Promise<void>
+
+  /** True while a transformAllSerial() run is in flight (drives UI disable). */
+  isTransformingAll: boolean
+
   _setStatus: (id: string, status: FileStatus) => void
   _setMetadata: (id: string, metadata: ImageMetadata) => void
   _setError: (id: string, error: string) => void
@@ -40,6 +55,7 @@ interface BatchState {
   _finishTransform: (
     id: string,
     blob: Blob,
+    outputFormat: ImageFormat,
     thumbUrl: string,
     note?: string,
   ) => void
@@ -63,11 +79,45 @@ export const useBatchStore = create<BatchState>((set, get) => {
   const setError = (id: string, error: string) =>
     patchFile(id, { status: 'error', error })
 
+  /**
+   * Shared Phase 3/4 transform core for one file: guard on 'analyzed' status,
+   * run strip → verify → rewrite, commit atomically (or fail atomically).
+   * Used by both triggerTransform() (single card button) and
+   * transformAllSerial() (batch run). `stripFn` is the test-only override.
+   */
+  const transformOne = async (id: string, stripFn?: StripFn) => {
+    const batchFile = useBatchStore.getState().files.find((f) => f.id === id)
+    // Guard: only transform from analyzed status (also no-ops when the file
+    // was removed mid-run).
+    if (!batchFile || batchFile.status !== 'analyzed') return
+
+    useBatchStore.getState()._startTransform(id)
+    const result = await runTransform(batchFile, stripFn)
+
+    if (!result.ok) {
+      useBatchStore.getState()._failTransform(id, result.error)
+      return
+    }
+
+    // Create a preview object URL for the transformed blob.
+    const transformedThumbUrl = URL.createObjectURL(result.blob)
+    useBatchStore
+      .getState()
+      ._finishTransform(
+        id,
+        result.blob,
+        result.outputFormat,
+        transformedThumbUrl,
+        result.note,
+      )
+  }
+
   return {
     files: [],
     rejections: [],
     selectedId: null,
     analyzeSeq: 0,
+    isTransformingAll: false,
 
     addFiles: (incoming) => {
       const state = get()
@@ -135,31 +185,36 @@ export const useBatchStore = create<BatchState>((set, get) => {
 
     // ── Phase 3 transform actions ──────────────────────────────────────────────
 
-    triggerTransform: async (id) => {
-      const store = useBatchStore.getState()
-      const batchFile = store.files.find((f) => f.id === id)
-      if (!batchFile) return
-      // Guard: only transform from analyzed status.
-      if (batchFile.status !== 'analyzed') return
+    triggerTransform: async (id) => transformOne(id),
 
-      store._startTransform(id)
-      const result = await runTransform(batchFile)
+    // ── Phase 4 batch orchestration ────────────────────────────────────────────
 
-      if (!result.ok) {
-        useBatchStore.getState()._failTransform(id, result.error)
-        return
+    transformAllSerial: async (_stripFn) => {
+      // Re-entrancy guard: one batch run at a time.
+      if (get().isTransformingAll) return
+      set({ isTransformingAll: true })
+      try {
+        // Snapshot the ids once — files added mid-run are picked up by the
+        // next button press, not this run. The per-file core re-reads live
+        // state, so a file removed mid-run simply no-ops.
+        const ids = get()
+          .files.filter((f) => f.status === 'analyzed')
+          .map((f) => f.id)
+
+        // Serial, in array order — no Promise.all / worker pool here on
+        // purpose (see interface doc). One file failing does not stop the
+        // rest: transformOne marks it 'transform-error' and we continue.
+        for (const id of ids) {
+          await transformOne(id, _stripFn)
+        }
+      } finally {
+        set({ isTransformingAll: false })
       }
-
-      // Create a preview object URL for the transformed blob.
-      const transformedThumbUrl = URL.createObjectURL(result.blob)
-      useBatchStore
-        .getState()
-        ._finishTransform(id, result.blob, transformedThumbUrl, result.note)
     },
 
     _startTransform: (id) => patchFile(id, { status: 'transforming' }),
 
-    _finishTransform: (id, blob, thumbUrl, note) => {
+    _finishTransform: (id, blob, outputFormat, thumbUrl, note) => {
       // Atomically: replace original file with a zero-byte sentinel (frees
       // the underlying ArrayBuffer for GC), revoke the original thumbnail
       // object URL, and commit the transformed result.
@@ -179,6 +234,7 @@ export const useBatchStore = create<BatchState>((set, get) => {
                   thumbUrl: null,
                   status: 'transformed' as FileStatus,
                   transformedBlob: blob,
+                  outputFormat,
                   transformedThumbUrl: thumbUrl,
                   transformNote: note,
                 }

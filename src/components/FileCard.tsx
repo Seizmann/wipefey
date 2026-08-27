@@ -1,6 +1,7 @@
 import type { BatchFile, FileStatus } from '../lib/batch/types'
 import { formatBytes } from '../lib/batch/reducer'
 import { useBatchStore } from '../lib/batch/state'
+import { downloadTransformedFile } from '../lib/zip'
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 
@@ -164,6 +165,18 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
           {file.transformNote && (
             <p className="mt-0.5 font-mono text-[10px] text-muted">{file.transformNote}</p>
           )}
+          {/* Phase 4: real browser download of the stored transformed blob,
+              named per the format contract (e.g. photo.heic → photo.jpg). */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              downloadTransformedFile(file)
+            }}
+            className="mt-2 w-full rounded-[6px] border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3"
+          >
+            Download
+          </button>
         </div>
       )}
 
