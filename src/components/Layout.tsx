@@ -1,3 +1,4 @@
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import { Logo } from './Logo'
 import { GitHubStar } from './GitHubStar'
@@ -20,14 +21,17 @@ function navClass({ isActive }: { isActive: boolean }) {
   }`
 }
 
-function ThemeToggle() {
+function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggleTheme } = useTheme()
   return (
     <button
       type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-      className="ml-1 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground"
+      className={
+        className ??
+        'ml-1 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground'
+      }
     >
       <span aria-hidden>{theme === 'dark' ? '☀' : '☾'}</span>
       <span className="hidden font-mono uppercase tracking-wide sm:inline">
@@ -37,12 +41,167 @@ function ThemeToggle() {
   )
 }
 
+function MobileMenuButton({
+  open,
+  onClick,
+}: {
+  open: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={open}
+      aria-controls="mobile-menu"
+      aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+      className="inline-flex h-8 shrink-0 items-center justify-center rounded-wxs border border-border px-2 text-muted transition-colors hover:border-border-strong hover:text-foreground sm:hidden"
+    >
+      <svg
+        aria-hidden
+        width={16}
+        height={16}
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      >
+        {open ? (
+          <>
+            <line x1="3" y1="3" x2="13" y2="13" />
+            <line x1="13" y1="3" x2="3" y2="13" />
+          </>
+        ) : (
+          <>
+            <line x1="2" y1="4.5" x2="14" y2="4.5" />
+            <line x1="2" y1="8" x2="14" y2="8" />
+            <line x1="2" y1="11.5" x2="14" y2="11.5" />
+          </>
+        )}
+      </svg>
+    </button>
+  )
+}
+
+function MobileMenu({
+  open,
+  onClose,
+}: {
+  open: boolean
+  onClose: () => void
+}) {
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close on click outside
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) onClose()
+    },
+    [onClose],
+  )
+
+  // Close on Escape + focus trap
+  useEffect(() => {
+    if (!open) return
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab' || !menuRef.current) return
+
+      const focusable = Array.from(
+        menuRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])',
+        ),
+      )
+      if (focusable.length === 0) return
+
+      const first = focusable[0]!
+      const last = focusable[focusable.length - 1]!
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
+  // Focus first link when menu opens
+  useEffect(() => {
+    if (!open) return
+    // Small delay so the DOM is painted before focusing
+    const id = requestAnimationFrame(() => {
+      const first = menuRef.current?.querySelector<HTMLElement>('a[href]')
+      first?.focus()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [open])
+
+  if (!open) return null
+
+  return (
+    <div
+      ref={menuRef}
+      role="dialog"
+      aria-label="Navigation menu"
+      onClick={handleOverlayClick}
+      className="fixed inset-0 top-14 z-30 bg-black/50 sm:hidden"
+    >
+      <nav
+        id="mobile-menu"
+        className="border-b border-border bg-bg px-4 py-3 shadow-md"
+      >
+        <ul className="flex flex-col gap-1">
+          {NAV.filter((n) => n.to !== '/').map((n) => (
+            <li key={n.to}>
+              <NavLink
+                to={n.to}
+                end={n.to === '/'}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `block rounded-wxs px-3 py-2 text-sm transition-colors ${
+                    isActive
+                      ? 'text-foreground font-medium'
+                      : 'text-muted hover:text-foreground hover:bg-surface'
+                  }`
+                }
+              >
+                {n.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 border-t border-border pt-3">
+          <ThemeToggle className="inline-flex h-8 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground" />
+        </div>
+      </nav>
+    </div>
+  )
+}
+
 export function Layout() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const toggleMenu = useCallback(() => setMenuOpen((o) => !o), [])
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-20 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2.5 text-foreground">
+          {/* Logo — full wordmark on desktop, icon + short name on mobile */}
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 text-foreground"
+          >
             <Logo size={22} />
             <span className="font-mono text-sm font-medium tracking-tight">
               Wipefey
@@ -51,31 +210,32 @@ export function Layout() {
               by RexiO
             </span>
           </Link>
-          <nav className="flex min-w-0 items-center gap-2 sm:gap-5">
+
+          {/* Desktop nav — all links + star + theme toggle inline */}
+          <nav className="hidden min-w-0 items-center gap-5 sm:flex">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 end={n.to === '/'}
-                className={`${navClass} ${n.to === '/' ? 'hidden sm:inline' : ''}`}
+                className={navClass}
               >
-                {/* "How it works" is shortened below `sm` so the navbar
-                    (logo + 4 links + star widget + theme toggle) fits at
-                    375px without wrapping (Phase 6b responsive audit). */}
-                {n.to === '/how-it-works' ? (
-                  <>
-                    <span className="sm:hidden">How</span>
-                    <span className="hidden sm:inline">How it works</span>
-                  </>
-                ) : (
-                  n.label
-                )}
+                {n.label}
               </NavLink>
             ))}
             <GitHubStar />
             <ThemeToggle />
           </nav>
+
+          {/* Mobile: star + hamburger button (Home hidden — logo covers it) */}
+          <nav className="flex items-center gap-2 sm:hidden">
+            <GitHubStar />
+            <MobileMenuButton open={menuOpen} onClick={toggleMenu} />
+          </nav>
         </div>
+
+        {/* Mobile dropdown menu */}
+        <MobileMenu open={menuOpen} onClose={closeMenu} />
       </header>
 
       <main className="flex-1">
