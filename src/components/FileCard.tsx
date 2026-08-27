@@ -92,7 +92,7 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
           onSelect(file.id)
         }
       }}
-      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-[8px] border bg-surface transition-colors ${
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-wsm border bg-surface transition-colors ${
         selected ? 'border-accent' : 'border-border hover:border-border-strong'
       }`}
     >
@@ -141,7 +141,7 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
               e.stopPropagation()
               void triggerTransform(file.id)
             }}
-            className="w-full rounded-[6px] border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3"
+            className="w-full rounded-wxs border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3"
           >
             Transform
           </button>
@@ -173,7 +173,7 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
               e.stopPropagation()
               downloadTransformedFile(file)
             }}
-            className="mt-2 w-full rounded-[6px] border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3"
+            className="mt-2 w-full rounded-wxs border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3"
           >
             Download
           </button>
@@ -188,7 +188,7 @@ export function FileCard({ file, selected, onSelect, onRemove }: Props) {
           e.stopPropagation()
           onRemove(file.id)
         }}
-        className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black/60 font-mono text-xs text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+        className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black/60 font-mono text-xs text-white opacity-0 transition-opacity hover:bg-black/80 focus-visible:opacity-100 group-hover:opacity-100"
       >
         ✕
       </button>

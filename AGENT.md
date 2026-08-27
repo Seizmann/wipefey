@@ -119,6 +119,26 @@ re-encoded JPEG, no EXIF removal needed since canvas already strips). Backed by
 Geist Sans + Geist Mono are SIL OFL 1.1 (free). No open alternative needed; self-hosted for
 privacy + performance (no external font CDN).
 
+### D6 — `@theme` must stay non-`inline` in tokens.css (Phase 6)
+
+The Phase-0 tokens used `@theme inline`, which inlines the variable *values*
+into utilities (`text-muted` → `var(--w-gray-400)`), so the `.light` overrides
+of the semantic `--color-*` tokens were silent no-ops — light mode never
+actually applied. Plain `@theme` makes utilities reference `var(--color-*)`,
+which the `.light` block flips. **Do not switch back to `inline`.** DESIGN.md
+(§10) documents this; it is the source of truth for the visual system and
+`src/design/tokens.css` must stay in lockstep with it.
+
+### D7 — Route-level code split for the Tool page (Phase 6)
+
+`src/pages/Tool` pulls in exifr, piexifjs, and fflate — the heaviest deps in
+the app, none of which landing/content pages need. `routes.tsx` lazy-loads
+ToolPage inside a `<Suspense fallback={null}>` boundary. Result: main chunk
+467 kB → 311 kB (99 kB gzip), Tool chunk 156 kB loads on demand. Lighthouse
+(Home): perf 80 → 86; SEO 91 → 100 (after adding a minimal `public/robots.txt`
+— full SEO/sitemap work is still Phase 7). Note for Phase 7: the prerender
+script must be Suspense-aware when rendering the /tool route statically.
+
 ## AI-marker heuristic (Phase 2)
 
 The marker registry lives in `src/lib/ai-heuristics/markers.ts` and must be **data-driven and

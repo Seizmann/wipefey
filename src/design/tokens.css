@@ -1,18 +1,20 @@
 /* ============================================================================
    Wipefey — Design Tokens (Tailwind v4, CSS-first)
    ----------------------------------------------------------------------------
-   Geist-style: achromatic, dark-first, 4px spacing ramp, small radii,
-   single interactive accent (#0066f3), status shown as indicator DOTS only.
-   Semantic tokens -> Tailwind theme. See DESIGN.md for the full system.
+   Geist-style (verified against vercel.com/geist 2026): achromatic, dark-first,
+   4px spacing ramp, small radii (6/8/12px), single interactive accent
+   (#0066f3), status shown as indicator DOTS only. Semantic tokens flip with
+   the `.light` class on <html>; raw `--w-*` values are theme-invariant.
+   THE single source of truth is DESIGN.md — keep this file in lockstep.
    ========================================================================== */
 
 @import "tailwindcss";
 
-/* Faithful dark-first Geist palette. */
+/* ── Raw ramp (theme-invariant) ─────────────────────────────────────────── */
 :root {
   color-scheme: dark;
 
-  /* Geist grayscale ramp */
+  /* Geist grayscale ramp (raw stops; semantic roles map below) */
   --w-black: #000000;
   --w-gray-900: #0a0a0a;
   --w-gray-800: #171717;
@@ -20,27 +22,33 @@
   --w-gray-600: #404040;
   --w-gray-500: #525252;
   --w-gray-400: #8b8b8b;
-  --w-gray-300: #afafaf;
+  --w-gray-300: #a8a8a8;
   --w-gray-200: #d4d4d4;
   --w-gray-100: #e6e6e6;
   --w-white: #ffffff;
 
+  /* The only interactive color. Hover is a darker stop, not opacity. */
   --w-accent: #0066f3;
+  --w-accent-hover: #0052c4;
   --w-accent-muted: rgba(0, 102, 243, 0.12);
+
+  /* Status indicators — dots and small badges ONLY (see DESIGN.md §8). */
   --w-status-clean: #3fb950;
   --w-status-ai: #f85149;
   --w-status-unsure: #d29922;
+
+  /* Focus ring uses the accent; applied globally in index.css. */
+  --w-focus: var(--w-accent);
+
+  /* Elevation: used sparingly — surfaces do most of the work. */
+  --w-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --w-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
-/* --- Light theme (the "alternate" surface, per Geist) --- */
-.light {
-  color-scheme: light;
-}
-
-/* --- Semantic surfaces & text (darker = canonical in dark mode) --- */
-/* This maps Geist roles onto class-name-able utilities used across the app. */
-
-@theme inline {
+/* ── Semantic tokens (dark = canonical) ─────────────────────────────────── */
+/* Plain @theme (not `inline`): utilities must reference var(--color-*) so the
+   `.light` overrides below actually flip them. */
+@theme {
   --color-bg: var(--w-black);
   --color-surface: var(--w-gray-900);
   --color-surface-2: var(--w-gray-800);
@@ -49,8 +57,9 @@
   --color-border-strong: var(--w-gray-700);
   --color-foreground: var(--w-white);
   --color-muted: var(--w-gray-400);
-  --color-faint: var(--w-gray-600);
+  --color-faint: #767676; /* ≥4.5:1 on #000 (AA for small text) */
   --color-accent: var(--w-accent);
+  --color-accent-hover: var(--w-accent-hover);
   --color-accent-muted: var(--w-accent-muted);
   --color-clean: var(--w-status-clean);
   --color-ai: var(--w-status-ai);
@@ -60,13 +69,15 @@
     sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --radius-wxs: 6px;
-  --radius-wsm: 8px;
-  --radius-wmd: 12px;
+  --radius-wxs: 6px;  /* buttons, inputs, small controls */
+  --radius-wsm: 8px;  /* cards, panels */
+  --radius-wmd: 12px; /* drop zone, menus, modals, toasts */
 }
 
-/* Light-surface overrides (switch semantic tokens when .light is on) */
+/* ── Light theme (the "alternate" surface, per Geist) ───────────────────── */
 .light {
+  color-scheme: light;
+
   --color-bg: var(--w-white);
   --color-surface: #fafafa;
   --color-surface-2: #f2f2f2;
@@ -74,8 +85,12 @@
   --color-border: #e5e5e5;
   --color-border-strong: #d4d4d4;
   --color-foreground: var(--w-gray-900);
-  --color-muted: var(--w-gray-500);
-  --color-faint: var(--w-gray-400);
+  --color-muted: var(--w-gray-500); /* 7.4:1 on #fff */
+  --color-faint: #6f6f6f; /* 5.0:1 on #fff */
+  --color-accent-hover: #0052c4;
+  --w-accent-muted: rgba(0, 102, 243, 0.08);
+  --w-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --w-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Tabular numbers for metadata/data, per Geist discipline. */

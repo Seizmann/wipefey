@@ -2,6 +2,7 @@ import { useDropzone } from '../hooks/useDropzone'
 import { useBatchStore } from '../lib/batch/state'
 import { MAX_FILE_COUNT, MAX_FILE_SIZE } from '../lib/batch/types'
 import { formatBytes } from '../lib/batch/reducer'
+import { Logo } from './Logo'
 
 /**
  * Upload zone: drag-and-drop + click-to-browse. Per-file validation happens
@@ -19,7 +20,6 @@ export function DropZone() {
       <div
         role="button"
         tabIndex={0}
-        aria-label="Upload images"
         onClick={openPicker}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -31,15 +31,13 @@ export function DropZone() {
         onDragEnter={onDragEnter}
         onDragLeave={onDragLeave}
         onDragOver={onDragOver}
-        className={`flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[12px] border-2 border-dashed px-6 py-10 text-center transition-colors ${
+        className={`flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-3 rounded-wmd border-2 border-dashed px-6 py-10 text-center transition-colors ${
           isDragging
             ? 'border-accent bg-accent-muted'
             : 'border-border bg-surface hover:border-border-strong'
         }`}
       >
-        <div className="font-mono text-2xl text-faint" aria-hidden>
-          ⌖
-        </div>
+        <Logo size={28} className="text-faint" decorative />
         <p className="text-sm font-medium text-foreground">
           Drop photos here, or <span className="text-accent">browse</span>
         </p>
@@ -66,7 +64,7 @@ export function DropZone() {
 
       {/* rejection messages */}
       {rejections.length > 0 && (
-        <div className="mt-4 rounded-[8px] border border-ai/30 bg-surface p-4">
+        <div className="mt-4 rounded-wsm border border-ai/30 bg-surface p-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-foreground">
               {rejections.length} file{rejections.length === 1 ? '' : 's'} skipped

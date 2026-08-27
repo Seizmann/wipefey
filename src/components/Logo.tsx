@@ -1,14 +1,17 @@
 interface LogoProps {
   size?: number
   className?: string
+  /** Omit role/aria-label for purely decorative uses (drop zone, etc.). */
+  decorative?: boolean
 }
 
 /**
  * Wipefey mark — a square photo/CCD sensor frame with a horizontal "wipe"
  * motion-slice through it and a terminal caret (no AI vibe, monochrome two-tone).
  * Renders with currentColor so it adapts to light/dark themes.
+ * This is the ONLY logo component — do not create a second variant.
  */
-export function Logo({ size = 24, className }: LogoProps) {
+export function Logo({ size = 24, className, decorative = false }: LogoProps) {
   return (
     <svg
       width={size}
@@ -16,8 +19,9 @@ export function Logo({ size = 24, className }: LogoProps) {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Wipefey"
+      role={decorative ? undefined : 'img'}
+      aria-hidden={decorative || undefined}
+      aria-label={decorative ? undefined : 'Wipefey'}
       className={className}
     >
       {/* Outer sensor frame */}

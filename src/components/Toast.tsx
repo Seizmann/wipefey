@@ -16,7 +16,7 @@ export function Toasts() {
       aria-live="polite"
       className="fixed bottom-6 left-1/2 z-50 w-max max-w-[min(90vw,32rem)] -translate-x-1/2"
     >
-      <div className="flex items-center gap-2.5 rounded-[8px] border border-border bg-surface px-4 py-2.5 shadow-lg">
+      <div className="flex items-center gap-2.5 rounded-wsm border border-border bg-surface px-4 py-2.5 shadow-[var(--w-shadow-md)]">
         <span
           aria-hidden
           className={`size-2 shrink-0 rounded-full ${

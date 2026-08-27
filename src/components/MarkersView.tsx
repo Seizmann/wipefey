@@ -52,7 +52,7 @@ function BadgeIndicator({ badge }: { badge: AiBadge }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-[8px] border border-border bg-surface">
+    <section className="rounded-wsm border border-border bg-surface">
       <h4 className="border-b border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
         {title}
       </h4>
@@ -82,7 +82,7 @@ function MarkerRow({ marker }: { marker: MatchedMarker }) {
         <span className="text-foreground">{marker.matchedKey}</span>
       </dt>
       {/* Value */}
-      <dd className="whitespace-pre-wrap break-words rounded-[6px] bg-surface-2 px-2.5 py-1.5 font-mono text-xs text-foreground">
+      <dd className="whitespace-pre-wrap break-words rounded-wxs bg-surface-2 px-2.5 py-1.5 font-mono text-xs text-foreground">
         {marker.matchedValue || '(empty value)'}
       </dd>
     </div>
@@ -140,7 +140,7 @@ export function MarkersView({ metadata }: Props) {
           <p className="text-xs text-foreground">{result.descriptor}</p>
 
           {/* Caveat — always shown, mandatory per spec */}
-          <p className="rounded-[6px] border border-border/60 bg-surface-2 px-3 py-2 text-xs text-muted">
+          <p className="rounded-wxs border border-border/60 bg-surface-2 px-3 py-2 text-xs text-muted">
             {result.caveat}
           </p>
         </div>

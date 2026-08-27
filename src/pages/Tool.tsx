@@ -71,7 +71,7 @@ export function ToolPage() {
       {files.length > 0 && (
         <div className="mt-8">
           {/* Batch action bar */}
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-mono text-sm uppercase tracking-wide text-muted">
               Batch · {files.length} / {MAX_FILE_COUNT}
             </h2>
@@ -83,7 +83,7 @@ export function ToolPage() {
                   type="button"
                   disabled={isTransforming}
                   onClick={() => void transformAllSerial()}
-                  className="rounded-[6px] border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-wxs border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isTransformingAll
                     ? 'transforming…'
@@ -96,7 +96,7 @@ export function ToolPage() {
                   type="button"
                   disabled={isZipping}
                   onClick={() => void handleDownloadZip()}
-                  className="rounded-[6px] border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-wxs border border-border bg-surface-2 px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:border-border-strong hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isZipping
                     ? 'zipping…'
@@ -106,7 +106,7 @@ export function ToolPage() {
               <button
                 type="button"
                 onClick={reset}
-                className="rounded-[6px] border border-border px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground"
+                className="rounded-wxs border border-border px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground"
               >
                 clear all
               </button>
@@ -139,7 +139,7 @@ export function ToolPage() {
               {selected ? (
                 <MetadataPanel file={selected} />
               ) : (
-                <div className="rounded-[8px] border border-border bg-surface p-6 text-center font-mono text-sm text-muted">
+                <div className="rounded-wsm border border-border bg-surface p-6 text-center font-mono text-sm text-muted">
                   Select an analyzed file to see its metadata.
                 </div>
               )}

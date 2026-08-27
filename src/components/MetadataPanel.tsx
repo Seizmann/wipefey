@@ -38,7 +38,7 @@ function Section({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-[8px] border border-border bg-surface">
+    <section className="rounded-wsm border border-border bg-surface">
       <h4 className="border-b border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
         {title}
       </h4>
@@ -81,7 +81,7 @@ function PngChunksSection({ chunks }: { chunks: PngTextChunk[] }) {
               <span className="text-ai">decode failed</span>
             )}
           </dt>
-          <dd className="whitespace-pre-wrap break-words rounded-[6px] bg-surface-2 px-2.5 py-1.5 font-mono text-xs text-foreground">
+          <dd className="whitespace-pre-wrap break-words rounded-wxs bg-surface-2 px-2.5 py-1.5 font-mono text-xs text-foreground">
             {c.failed ? '(could not decode)' : c.value || '(empty value)'}
           </dd>
         </div>
@@ -170,7 +170,7 @@ export function MetadataPanel({ file }: Props) {
 
   if (!meta) {
     return (
-      <div className="rounded-[8px] border border-border bg-surface p-6 text-center">
+      <div className="rounded-wsm border border-border bg-surface p-6 text-center">
         <p className="font-mono text-sm text-muted">
           {file.status === 'error'
             ? 'Analysis failed for this file.'
@@ -193,7 +193,7 @@ export function MetadataPanel({ file }: Props) {
       </div>
 
       {meta.warning && (
-        <p className="rounded-[6px] border border-unsure/30 bg-surface p-3 text-xs text-unsure">
+        <p className="rounded-wxs border border-unsure/30 bg-surface p-3 text-xs text-unsure">
           {meta.warning}
         </p>
       )}
@@ -209,7 +209,7 @@ export function MetadataPanel({ file }: Props) {
 
       {/* ── Raw metadata categories ── */}
       {sections.length === 0 ? (
-        <p className="rounded-[8px] border border-border bg-surface p-5 font-mono text-xs text-muted">
+        <p className="rounded-wsm border border-border bg-surface p-5 font-mono text-xs text-muted">
           No readable metadata found in this file.
         </p>
       ) : (

@@ -12,7 +12,7 @@ const NAV = [
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
-  return `text-sm transition-colors ${
+  return `text-[13px] transition-colors sm:text-sm ${
     isActive
       ? 'text-foreground font-medium'
       : 'text-muted hover:text-foreground'
@@ -26,10 +26,12 @@ function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-      className="ml-2 inline-flex h-8 items-center gap-1.5 rounded-[6px] border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground"
+      className="ml-1 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground"
     >
       <span aria-hidden>{theme === 'dark' ? '☀' : '☾'}</span>
-      <span className="font-mono uppercase tracking-wide">{theme}</span>
+      <span className="hidden font-mono uppercase tracking-wide sm:inline">
+        {theme}
+      </span>
     </button>
   )
 }
@@ -48,13 +50,13 @@ export function Layout() {
               by RexiO
             </span>
           </Link>
-          <nav className="flex items-center gap-5">
+          <nav className="flex min-w-0 items-center gap-3 sm:gap-5">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 end={n.to === '/'}
-                className={navClass}
+                className={`${navClass} ${n.to === '/' ? 'hidden sm:inline' : ''}`}
               >
                 {n.label}
               </NavLink>
@@ -79,12 +81,25 @@ export function Layout() {
               Wipefey by RexiO · MIT · open source
             </span>
           </div>
-          <div className="flex gap-5 font-mono text-xs text-muted">
-            <Link to="/privacy" className="hover:text-foreground">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-muted">
+            <a
+              href="https://rexio.pro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-foreground"
+            >
+              RexiO
+            </a>
+            <Link to="/about" className="transition-colors hover:text-foreground">
+              About
+            </Link>
+            <Link
+              to="/privacy"
+              className="transition-colors hover:text-foreground"
+            >
               Privacy
             </Link>
-            <span className="text-faint">·</span>
-            <span>100% client-side</span>
+            <span className="text-faint">100% client-side</span>
           </div>
         </div>
       </footer>
