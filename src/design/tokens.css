@@ -1,0 +1,83 @@
+/* ============================================================================
+   Wipefey — Design Tokens (Tailwind v4, CSS-first)
+   ----------------------------------------------------------------------------
+   Geist-style: achromatic, dark-first, 4px spacing ramp, small radii,
+   single interactive accent (#0066f3), status shown as indicator DOTS only.
+   Semantic tokens -> Tailwind theme. See DESIGN.md for the full system.
+   ========================================================================== */
+
+@import "tailwindcss";
+
+/* Faithful dark-first Geist palette. */
+:root {
+  color-scheme: dark;
+
+  /* Geist grayscale ramp */
+  --w-black: #000000;
+  --w-gray-900: #0a0a0a;
+  --w-gray-800: #171717;
+  --w-gray-700: #262626;
+  --w-gray-600: #404040;
+  --w-gray-500: #525252;
+  --w-gray-400: #8b8b8b;
+  --w-gray-300: #afafaf;
+  --w-gray-200: #d4d4d4;
+  --w-gray-100: #e6e6e6;
+  --w-white: #ffffff;
+
+  --w-accent: #0066f3;
+  --w-accent-muted: rgba(0, 102, 243, 0.12);
+  --w-status-clean: #3fb950;
+  --w-status-ai: #f85149;
+  --w-status-unsure: #d29922;
+}
+
+/* --- Light theme (the "alternate" surface, per Geist) --- */
+.light {
+  color-scheme: light;
+}
+
+/* --- Semantic surfaces & text (darker = canonical in dark mode) --- */
+/* This maps Geist roles onto class-name-able utilities used across the app. */
+
+@theme inline {
+  --color-bg: var(--w-black);
+  --color-surface: var(--w-gray-900);
+  --color-surface-2: var(--w-gray-800);
+  --color-surface-3: var(--w-gray-700);
+  --color-border: var(--w-gray-800);
+  --color-border-strong: var(--w-gray-700);
+  --color-foreground: var(--w-white);
+  --color-muted: var(--w-gray-400);
+  --color-faint: var(--w-gray-600);
+  --color-accent: var(--w-accent);
+  --color-clean: var(--w-status-clean);
+  --color-ai: var(--w-status-ai);
+  --color-unsure: var(--w-status-unsure);
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --radius-wxs: 6px;
+  --radius-wsm: 8px;
+  --radius-wmd: 12px;
+}
+
+/* Light-surface overrides (switch semantic tokens when .light is on) */
+.light {
+  --color-bg: var(--w-white);
+  --color-surface: #fafafa;
+  --color-surface-2: #f2f2f2;
+  --color-surface-3: #ededed;
+  --color-border: #e5e5e5;
+  --color-border-strong: #d4d4d4;
+  --color-foreground: var(--w-gray-900);
+  --color-muted: var(--w-gray-500);
+  --color-faint: var(--w-gray-400);
+}
+
+/* Tabular numbers for metadata/data, per Geist discipline. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
