@@ -51,6 +51,7 @@
   --color-muted: var(--w-gray-400);
   --color-faint: var(--w-gray-600);
   --color-accent: var(--w-accent);
+  --color-accent-muted: var(--w-accent-muted);
   --color-clean: var(--w-status-clean);
   --color-ai: var(--w-status-ai);
   --color-unsure: var(--w-status-unsure);

@@ -29,3 +29,4 @@ npm-debug.log*
 # --- Wipefey-specific ---
 # PROGRESS.md is a private agent/log file — never pushed to the repo
 PROGRESS.md
+.verify/
