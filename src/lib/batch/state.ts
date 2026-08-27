@@ -9,6 +9,7 @@ import {
   validateFiles,
   type Rejection,
 } from './reducer'
+import { runTransform } from '../transform'
 
 interface BatchState {
   files: BatchFile[]
@@ -24,10 +25,25 @@ interface BatchState {
   reset: () => void
   dismissRejections: () => void
 
+  /**
+   * Trigger the Phase 3 transform pipeline for a single file.
+   * The file must be in 'analyzed' status. Runs strip → verify → rewrite
+   * and commits the result to state atomically. No-ops if already transforming.
+   */
+  triggerTransform: (id: string) => Promise<void>
+
   _setStatus: (id: string, status: FileStatus) => void
   _setMetadata: (id: string, metadata: ImageMetadata) => void
   _setError: (id: string, error: string) => void
   _setThumb: (id: string, thumbUrl: string | null) => void
+  _startTransform: (id: string) => void
+  _finishTransform: (
+    id: string,
+    blob: Blob,
+    thumbUrl: string,
+    note?: string,
+  ) => void
+  _failTransform: (id: string, error: string) => void
 }
 
 /**
@@ -98,6 +114,8 @@ export const useBatchStore = create<BatchState>((set, get) => {
       set((s) => {
         const target = s.files.find((f) => f.id === id)
         if (target?.thumbUrl) URL.revokeObjectURL(target.thumbUrl)
+        if (target?.transformedThumbUrl)
+          URL.revokeObjectURL(target.transformedThumbUrl)
         return {
           files: s.files.filter((f) => f.id !== id),
           selectedId: s.selectedId === id ? null : s.selectedId,
@@ -106,11 +124,72 @@ export const useBatchStore = create<BatchState>((set, get) => {
 
     reset: () =>
       set((s) => {
-        s.files.forEach((f) => f.thumbUrl && URL.revokeObjectURL(f.thumbUrl))
+        s.files.forEach((f) => {
+          if (f.thumbUrl) URL.revokeObjectURL(f.thumbUrl)
+          if (f.transformedThumbUrl) URL.revokeObjectURL(f.transformedThumbUrl)
+        })
         return { files: [], selectedId: null, rejections: [] }
       }),
 
     dismissRejections: () => set({ rejections: [] }),
+
+    // ── Phase 3 transform actions ──────────────────────────────────────────────
+
+    triggerTransform: async (id) => {
+      const store = useBatchStore.getState()
+      const batchFile = store.files.find((f) => f.id === id)
+      if (!batchFile) return
+      // Guard: only transform from analyzed status.
+      if (batchFile.status !== 'analyzed') return
+
+      store._startTransform(id)
+      const result = await runTransform(batchFile)
+
+      if (!result.ok) {
+        useBatchStore.getState()._failTransform(id, result.error)
+        return
+      }
+
+      // Create a preview object URL for the transformed blob.
+      const transformedThumbUrl = URL.createObjectURL(result.blob)
+      useBatchStore
+        .getState()
+        ._finishTransform(id, result.blob, transformedThumbUrl, result.note)
+    },
+
+    _startTransform: (id) => patchFile(id, { status: 'transforming' }),
+
+    _finishTransform: (id, blob, thumbUrl, note) => {
+      // Atomically: replace original file with a zero-byte sentinel (frees
+      // the underlying ArrayBuffer for GC), revoke the original thumbnail
+      // object URL, and commit the transformed result.
+      set((s) => {
+        const target = s.files.find((f) => f.id === id)
+        if (!target) return s
+        if (target.thumbUrl) URL.revokeObjectURL(target.thumbUrl)
+        const sentinel = new File([], target.file.name, {
+          type: target.file.type,
+        })
+        return {
+          files: s.files.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  file: sentinel,
+                  thumbUrl: null,
+                  status: 'transformed' as FileStatus,
+                  transformedBlob: blob,
+                  transformedThumbUrl: thumbUrl,
+                  transformNote: note,
+                }
+              : f,
+          ),
+        }
+      })
+    },
+
+    _failTransform: (id, error) =>
+      patchFile(id, { status: 'transform-error', transformError: error }),
 
     _setStatus: setStatus,
     _setMetadata: setMetadata,
