@@ -184,9 +184,9 @@ export function MetadataPanel({ file }: Props) {
   const sections = categories(meta)
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h3 className="truncate font-mono text-sm text-foreground">{file.file.name}</h3>
+    <div className="flex min-w-0 flex-col gap-4">
+      <div className="min-w-0 flex items-center justify-between gap-2">
+        <h3 className="min-w-0 truncate font-mono text-sm text-foreground" title={file.file.name}>{file.file.name}</h3>
         <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] uppercase text-muted">
           {meta.format}
         </span>

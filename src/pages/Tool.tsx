@@ -79,7 +79,7 @@ export function ToolPage() {
             <h2 className="font-mono text-sm uppercase tracking-wide text-muted">
               Batch · {files.length} / {MAX_FILE_COUNT}
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Phase 4: serial Transform-all — hidden at zero analyzed,
                   disabled while any transform is in flight. */}
               {analyzedCount > 0 && (
@@ -119,7 +119,7 @@ export function ToolPage() {
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {/* File grid */}
-            <div>
+            <div className="min-w-0">
               {isAnalyzing && (
                 <p className="mb-3 font-mono text-xs text-faint">
                   analyzing… up to {ANALYZE_CONCURRENCY} files at a time
@@ -139,7 +139,7 @@ export function ToolPage() {
             </div>
 
             {/* Metadata detail */}
-            <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
               {selected ? (
                 <MetadataPanel file={selected} />
               ) : (
