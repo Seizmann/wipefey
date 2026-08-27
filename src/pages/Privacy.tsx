@@ -106,7 +106,7 @@ export function PrivacyPage() {
           covered by Vercel's own policies. And of course, the repository is
           open source — you can verify every claim on this page by reading{' '}
           <a
-            href="https://github.com/SpritexAI/wipefey"
+            href="https://github.com/Seizmann/wipefey"
             className="text-accent transition-colors hover:text-accent-hover"
           >
             the code

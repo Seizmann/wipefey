@@ -78,10 +78,10 @@ export function AboutPage() {
             The full source is public under the MIT license — contributions and
             issues are welcome on GitHub at{' '}
             <a
-              href="https://github.com/SpritexAI/wipefey"
+              href="https://github.com/Seizmann/wipefey"
               className="font-mono text-accent transition-colors hover:text-accent-hover"
             >
-              github.com/SpritexAI/wipefey
+              github.com/Seizmann/wipefey
             </a>
             .
           </p>

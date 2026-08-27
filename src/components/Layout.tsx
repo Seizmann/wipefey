@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import { Logo } from './Logo'
+import { GitHubStar } from './GitHubStar'
 import { Toasts } from './Toast'
 import { useTheme } from '../hooks/useTheme'
 
@@ -50,7 +51,7 @@ export function Layout() {
               by RexiO
             </span>
           </Link>
-          <nav className="flex min-w-0 items-center gap-3 sm:gap-5">
+          <nav className="flex min-w-0 items-center gap-2 sm:gap-5">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -58,9 +59,20 @@ export function Layout() {
                 end={n.to === '/'}
                 className={`${navClass} ${n.to === '/' ? 'hidden sm:inline' : ''}`}
               >
-                {n.label}
+                {/* "How it works" is shortened below `sm` so the navbar
+                    (logo + 4 links + star widget + theme toggle) fits at
+                    375px without wrapping (Phase 6b responsive audit). */}
+                {n.to === '/how-it-works' ? (
+                  <>
+                    <span className="sm:hidden">How</span>
+                    <span className="hidden sm:inline">How it works</span>
+                  </>
+                ) : (
+                  n.label
+                )}
               </NavLink>
             ))}
+            <GitHubStar />
             <ThemeToggle />
           </nav>
         </div>

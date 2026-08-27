@@ -101,10 +101,19 @@ export default async function handler(request) {
     }
 
     const decision = decideRateLimit({ count, resetAt, now })
-    const body = { ip, ...decision }
 
     if (decision.allowed) {
-      return jsonResponse(200, { allowed: true, ...body })
+      // Contract shape (AGENT.md): the 200 body exposes `retryAfter` (seconds,
+      // always 0) — NOT the core's internal `retryAfterSeconds` field name.
+      // Caught in live verification: the raw spread leaked the core's name.
+      return jsonResponse(200, {
+        allowed: true,
+        ip,
+        limit: decision.limit,
+        remaining: decision.remaining,
+        resetAt: decision.resetAt,
+        retryAfter: decision.retryAfterSeconds,
+      })
     }
     return jsonResponse(
       429,

@@ -9,7 +9,8 @@
 <p align="center">
   <a href="https://wipefey.rexio.pro">wipefey.rexio.pro</a> ·
   <a href="https://rexio.pro">RexiO</a> ·
-  <a href="https://spritexai.pro.bd">SpritexAI</a>
+  <a href="https://spritexai.pro.bd">SpritexAI</a> ·
+  <a href="https://github.com/Seizmann/wipefey">GitHub</a>
 </p>
 
 <p align="center">
