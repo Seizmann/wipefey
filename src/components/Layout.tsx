@@ -93,14 +93,6 @@ function MobileMenu({
 }) {
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close on click outside
-  const handleOverlayClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) onClose()
-    },
-    [onClose],
-  )
-
   // Close on Escape + focus trap
   useEffect(() => {
     if (!open) return
@@ -114,7 +106,7 @@ function MobileMenu({
 
       const focusable = Array.from(
         menuRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button, [tabindex]:not([tabindex="-1"])',
+          'a[href]:not([tabindex="-1"]), button:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])',
         ),
       )
       if (focusable.length === 0) return
@@ -149,41 +141,52 @@ function MobileMenu({
   if (!open) return null
 
   return (
-    <div
-      ref={menuRef}
-      role="dialog"
-      aria-label="Navigation menu"
-      onClick={handleOverlayClick}
-      className="fixed inset-0 top-14 z-30 bg-black/50 sm:hidden"
-    >
-      <nav
-        id="mobile-menu"
-        className="border-b border-border bg-bg px-4 py-3 shadow-md"
+    <div ref={menuRef} className="fixed inset-0 top-14 z-30 sm:hidden">
+      {/* Backdrop as a real button: click-outside-to-close without hanging a
+          click handler on a non-interactive div. tabIndex -1 keeps it out of
+          the focus trap below — Escape is the keyboard route out. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Close navigation menu"
+        onClick={onClose}
+        className="absolute inset-0 w-full cursor-default bg-black/50"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className="relative"
       >
-        <ul className="flex flex-col gap-1">
-          {NAV.filter((n) => n.to !== '/').map((n) => (
-            <li key={n.to}>
-              <NavLink
-                to={n.to}
-                end={n.to === '/'}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `block rounded-wxs px-3 py-2 text-sm transition-colors ${
-                    isActive
-                      ? 'text-foreground font-medium'
-                      : 'text-muted hover:text-foreground hover:bg-surface'
-                  }`
-                }
-              >
-                {n.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-3 border-t border-border pt-3">
-          <ThemeToggle className="inline-flex h-8 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground" />
-        </div>
-      </nav>
+        <nav
+          id="mobile-menu"
+          className="border-b border-border bg-bg px-4 py-3 shadow-md"
+        >
+          <ul className="flex flex-col gap-1">
+            {NAV.filter((n) => n.to !== '/').map((n) => (
+              <li key={n.to}>
+                <NavLink
+                  to={n.to}
+                  end={n.to === '/'}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    `block rounded-wxs px-3 py-2 text-sm transition-colors ${
+                      isActive
+                        ? 'text-foreground font-medium'
+                        : 'text-muted hover:text-foreground hover:bg-surface'
+                    }`
+                  }
+                >
+                  {n.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 border-t border-border pt-3">
+            <ThemeToggle className="inline-flex h-8 items-center gap-1.5 rounded-wxs border border-border px-2.5 text-xs text-muted transition-colors hover:border-border-strong hover:text-foreground" />
+          </div>
+        </nav>
+      </div>
     </div>
   )
 }
@@ -195,6 +198,14 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Keyboard users land here first — skips the header nav on every route. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-wxs focus:border focus:border-border-strong focus:bg-surface focus:px-3 focus:py-1.5 focus:font-mono focus:text-xs focus:text-foreground"
+      >
+        Skip to content
+      </a>
+
       <header className="sticky top-0 z-20 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           {/* Logo — full wordmark on desktop, icon + short name on mobile */}
@@ -212,7 +223,10 @@ export function Layout() {
           </Link>
 
           {/* Desktop nav — all links + star + theme toggle inline */}
-          <nav className="hidden min-w-0 items-center gap-5 sm:flex">
+          <nav
+            aria-label="Main"
+            className="hidden min-w-0 items-center gap-5 sm:flex"
+          >
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -228,7 +242,7 @@ export function Layout() {
           </nav>
 
           {/* Mobile: star + hamburger button (Home hidden — logo covers it) */}
-          <nav className="flex items-center gap-2 sm:hidden">
+          <nav aria-label="Mobile" className="flex items-center gap-2 sm:hidden">
             <GitHubStar />
             <MobileMenuButton open={menuOpen} onClick={toggleMenu} />
           </nav>
@@ -238,7 +252,7 @@ export function Layout() {
         <MobileMenu open={menuOpen} onClose={closeMenu} />
       </header>
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Outlet />
       </main>
 
