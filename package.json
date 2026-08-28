@@ -16,6 +16,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "preview": "vite preview",
     "verify:phase1": "esbuild scripts/verify-phase1.ts --bundle --platform=node --format=cjs --outfile=.verify/verify.cjs && node .verify/verify.cjs",
     "verify:phase2": "esbuild scripts/verify-phase2.ts --bundle --platform=node --format=cjs --outfile=.verify/verify-phase2.cjs && node .verify/verify-phase2.cjs",
@@ -40,15 +42,18 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
     "@types/piexifjs": "^1.0.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
     "esbuild": "^0.28.2",
+    "jsdom": "^30.0.1",
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }
