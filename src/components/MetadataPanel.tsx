@@ -153,6 +153,33 @@ function categories(meta: ImageMetadata): { id: MetadataCategory; el: ReactNode 
     els.push({ id: 'PNG text chunks', el: <PngChunksSection chunks={meta.pngChunks} /> })
   }
 
+  if (meta.c2pa || meta.digitalSourceType) {
+    els.push({
+      id: 'C2PA',
+      el: (
+        <>
+          {meta.c2pa && (
+            <>
+              <Row k="Carrier" v={meta.c2pa.containerLabel} />
+              <Row k="Creation tool" v={meta.c2pa.creationTool ?? '—'} />
+              {meta.c2pa.modelHint && (
+                <Row k="Model hint" v={meta.c2pa.modelHint} />
+              )}
+              {meta.c2pa.fields
+                .filter((f) => f.key !== 'claim_generator' && f.key !== 'softwareAgent')
+                .map((f) => (
+                  <Row key={f.key} k={f.key} v={f.value} />
+                ))}
+            </>
+          )}
+          {meta.digitalSourceType && (
+            <Row k="IPTC DigitalSourceType" v={meta.digitalSourceType} />
+          )}
+        </>
+      ),
+    })
+  }
+
   return els
 }
 

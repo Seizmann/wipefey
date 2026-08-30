@@ -178,20 +178,40 @@ function checkM2(meta: ImageMetadata): MatchedMarker | null {
 }
 
 /**
- * M3 — C2PA / Content Credentials JUMBF segment.
- * Confidence: strong (would be definite if combined with M1/M2 via M9)
+ * M3 — C2PA / Content Credentials manifest (JUMBF) present.
+ * Confidence: strong
  *
- * DEFERRED: Detecting a JUMBF/C2PA segment requires scanning raw binary data
- * for the 'jumb' box signature, which Phase 1's metadata pipeline does not
- * expose. Extending lib/metadata to carry raw byte presence checks would be
- * a meaningful new extraction stage outside Phase 2 scope.
+ * Two detection channels:
+ *  1. meta.c2pa — binary JUMBF manifest detected by lib/metadata/c2pa.ts
+ *     (JPEG APP11, PNG caBX/caMs/caSt, WebP RIFF chunk).
+ *  2. meta.digitalSourceType — IPTC Digital Source Type flagging
+ *     trainedAlgorithmicMedia (the fallback signal used by tools like
+ *     Midjourney that don't sign full C2PA manifests).
  *
- * This stub always returns null. Reported honestly in PROGRESS.md.
+ * IMPORTANT (badge honesty): C2PA presence confirms provenance data exists;
+ * its ABSENCE means nothing — most AI tools don't embed credentials and
+ * credentials are strippable. Never present absence as proof of non-AI origin.
  */
-function checkM3(_meta: ImageMetadata): MatchedMarker | null {
-  // TODO (Phase 2 deferral): scan raw bytes for JUMBF box signature
-  // ('jumb' at known offsets in JPEG APP11 or PNG iTXt 'XML:com.adobe.xmp').
-  // Track in PROGRESS.md — do not ship a fake positive or negative signal.
+function checkM3(meta: ImageMetadata): MatchedMarker | null {
+  if (meta.c2pa) {
+    const value = meta.c2pa.creationTool
+      ? `C2PA manifest present — creation tool: ${meta.c2pa.creationTool}`
+      : 'C2PA/JUMBF manifest present'
+    return {
+      id: 'M3',
+      confidence: 'strong',
+      matchedKey: `C2PA (${meta.c2pa.containerLabel})`,
+      matchedValue: truncated(value),
+    }
+  }
+  if (meta.digitalSourceType) {
+    return {
+      id: 'M3',
+      confidence: 'strong',
+      matchedKey: 'IPTC DigitalSourceType',
+      matchedValue: truncated(meta.digitalSourceType),
+    }
+  }
   return null
 }
 
@@ -340,13 +360,14 @@ function checkM8(meta: ImageMetadata): MatchedMarker | null {
  * M9 — C2PA block present AND dc:creator present (combo marker).
  * Confidence: definite
  *
- * Requires M3 to be non-null (C2PA present). Since M3 is deferred, this
- * marker is also deferred and always returns null. Documented in PROGRESS.md.
+ * Requires an actual C2PA/JUMBF manifest (meta.c2pa) — the IPTC
+ * DigitalSourceType fallback alone is not enough for the definite tier —
+ * combined with an XMP dc:creator matching a known AI tool name (M1).
  */
 function checkM9(meta: ImageMetadata): MatchedMarker | null {
-  const m3 = checkM3(meta)
+  if (!meta.c2pa) return null
   const m1 = checkM1(meta)
-  if (m3 !== null && m1 !== null) {
+  if (m1 !== null) {
     return {
       id: 'M9',
       confidence: 'definite',
@@ -420,7 +441,7 @@ export const MARKER_REGISTRY: MarkerDefinition[] = [
   {
     id: 'M3',
     source: 'Binary/JUMBF',
-    description: 'C2PA / Content Credentials segment present [DEFERRED]',
+    description: 'C2PA / Content Credentials (JUMBF) manifest present — signed provenance data',
     confidence: 'strong',
     check: checkM3,
   },
@@ -462,7 +483,7 @@ export const MARKER_REGISTRY: MarkerDefinition[] = [
   {
     id: 'M9',
     source: 'XMP + C2PA',
-    description: 'C2PA block AND dc:creator present (combo) [DEFERRED — requires M3]',
+    description: 'C2PA manifest AND dc:creator both present (combo)',
     confidence: 'definite',
     check: checkM9,
   },
@@ -477,8 +498,7 @@ export const MARKER_REGISTRY: MarkerDefinition[] = [
 
 /**
  * Run all registered marker checks against a metadata object and return
- * every matched result. Deferred markers (M3, M9) always return null and
- * are excluded from the result array.
+ * every matched result.
  */
 export function runAllMarkers(meta: ImageMetadata): MatchedMarker[] {
   const results: MatchedMarker[] = []

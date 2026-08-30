@@ -1,8 +1,13 @@
-import type { ImageFormat, ImageMetadata, PngTextChunk } from './unified'
+import type {
+  ImageFormat,
+  ImageMetadata,
+  PngTextChunk,
+} from './unified'
 import {
   extractPngTextChunks,
   isPng,
 } from './png'
+import { extractC2pa, findDigitalSourceType } from './c2pa'
 import { extractWithExifr } from './exif'
 
 /**
@@ -116,6 +121,10 @@ export async function extractImageMetadata(file: Blob): Promise<ImageMetadata> {
       format: 'png',
       ...pngDimensions(bytes),
       pngChunks: pngChunks ?? [],
+      // C2PA manifests ride in caBX/caMs/caSt ancillary chunks
+      c2pa: extractC2pa(bytes, format),
+      // PNG XMP (incl. IPTC DigitalSourceType) lives in text chunks
+      digitalSourceType: findDigitalSourceType(null, pngChunks),
       parsedAt,
       warning,
     }
@@ -143,6 +152,9 @@ export async function extractImageMetadata(file: Blob): Promise<ImageMetadata> {
       gps: r.gps,
       camera: r.camera,
       dates: r.dates,
+      // C2PA manifests ride in JPEG APP11 / WebP RIFF chunks
+      c2pa: extractC2pa(bytes, format),
+      digitalSourceType: findDigitalSourceType(r.xmp),
       parsedAt,
       warning,
     }

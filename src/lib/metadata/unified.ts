@@ -40,6 +40,31 @@ export interface IccData {
   [other: string]: unknown
 }
 
+/** How the C2PA/JUMBF manifest was embedded, per container format. */
+export type C2paContainer = 'app11-jumbf' | 'png-chunk' | 'riff-chunk'
+
+/** One key/value pair extracted from the C2PA manifest JSON (literal only). */
+export interface C2paField {
+  key: string
+  value: string
+}
+
+/**
+ * Detected C2PA / Content Credentials manifest. Presence of this object is
+ * the M3 detection signal — its absence is NOT evidence of non-AI origin.
+ */
+export interface C2paInfo {
+  container: C2paContainer
+  /** Human-readable carrier, e.g. 'APP11 JUMBF', 'PNG caBX', 'RIFF c2pa'. */
+  containerLabel: string
+  /** Best-effort claim_generator / softwareAgent value from the manifest. */
+  creationTool?: string
+  /** Best-effort model-name string found in the manifest (literal only). */
+  modelHint?: string
+  /** Literal key/value pairs successfully read out of the manifest. */
+  fields: C2paField[]
+}
+
 export interface GpsData {
   latitude: number | null
   longitude: number | null
@@ -73,6 +98,14 @@ export interface ImageMetadata {
   icc?: IccData
   /** Decoded text chunks. Primary AI-marker channel for PNG. */
   pngChunks?: PngTextChunk[]
+  /** C2PA / Content Credentials manifest when detected (M3 signal). */
+  c2pa?: C2paInfo | null
+  /**
+   * IPTC Digital Source Type value (e.g. the trainedAlgorithmicMedia URI)
+   * when present — the fallback AI-provenance signal for tools like
+   * Midjourney that do not sign full C2PA manifests.
+   */
+  digitalSourceType?: string | null
   gps?: GpsData | null
   camera?: CameraData | null
   dates?: DatesData | null
@@ -93,3 +126,4 @@ export type MetadataCategory =
   | 'Dates'
   | 'PNG text chunks'
   | 'ICC'
+  | 'C2PA'

@@ -70,11 +70,68 @@ describe('runAllMarkers', () => {
     })
   })
 
-  // ── M3: C2PA (deferred) ─────────────────────────────────────────────────
-  describe('M3 — C2PA (deferred)', () => {
-    it('always returns null', () => {
+  // ── M3: C2PA / Content Credentials ──────────────────────────────────────
+  describe('M3 — C2PA / Content Credentials', () => {
+    it('does not match clean metadata', () => {
       const result = runAllMarkers(meta())
       expect(result.filter((m) => m.id === 'M3')).toHaveLength(0)
+    })
+
+    it('matches a detected C2PA manifest with a creation tool', () => {
+      const result = runAllMarkers(
+        meta({
+          c2pa: {
+            container: 'app11-jumbf',
+            containerLabel: 'APP11 JUMBF',
+            creationTool: 'Adobe Firefly',
+            fields: [{ key: 'claim_generator', value: 'Adobe Firefly' }],
+          },
+        }),
+      )
+      expect(result.filter((m) => m.id === 'M3')).toHaveLength(1)
+      expect(result[0]!.confidence).toBe('strong')
+      expect(result[0]!.matchedKey).toBe('C2PA (APP11 JUMBF)')
+      expect(result[0]!.matchedValue).toContain('Adobe Firefly')
+    })
+
+    it('matches a detected C2PA manifest without fields', () => {
+      const result = runAllMarkers(
+        meta({
+          c2pa: {
+            container: 'png-chunk',
+            containerLabel: 'PNG caBX',
+            fields: [],
+          },
+        }),
+      )
+      expect(result.filter((m) => m.id === 'M3')).toHaveLength(1)
+      expect(result[0]!.matchedValue).toContain('manifest present')
+    })
+
+    it('matches IPTC trainedAlgorithmicMedia DigitalSourceType', () => {
+      const result = runAllMarkers(
+        meta({
+          digitalSourceType:
+            'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia',
+        }),
+      )
+      expect(result.filter((m) => m.id === 'M3')).toHaveLength(1)
+      expect(result[0]!.matchedKey).toBe('IPTC DigitalSourceType')
+    })
+
+    it('prefers the C2PA manifest over the DigitalSourceType fallback', () => {
+      const result = runAllMarkers(
+        meta({
+          c2pa: {
+            container: 'riff-chunk',
+            containerLabel: 'RIFF c2pa',
+            fields: [],
+          },
+          digitalSourceType: 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia',
+        }),
+      )
+      const m3 = result.find((m) => m.id === 'M3')!
+      expect(m3.matchedKey).toBe('C2PA (RIFF c2pa)')
     })
   })
 
@@ -307,13 +364,59 @@ describe('runAllMarkers', () => {
     })
   })
 
-  // ── M9: C2PA + dc:creator combo (deferred) ──────────────────────────────
-  describe('M9 — combo marker (deferred)', () => {
-    it('always returns null (M3 is deferred)', () => {
+  // ── M9: C2PA + dc:creator combo ─────────────────────────────────────────
+  describe('M9 — combo marker (C2PA + dc:creator)', () => {
+    it('does not fire on clean metadata', () => {
       const result = runAllMarkers(
         meta({ xmp: { 'dc:creator': 'Stable Diffusion' } }),
       )
       expect(result.filter((m) => m.id === 'M9')).toHaveLength(0)
+    })
+
+    it('fires (definite) when C2PA manifest AND matching dc:creator are present', () => {
+      const result = runAllMarkers(
+        meta({
+          xmp: { 'dc:creator': 'Stable Diffusion' },
+          c2pa: {
+            container: 'app11-jumbf',
+            containerLabel: 'APP11 JUMBF',
+            fields: [],
+          },
+        }),
+      )
+      const m9 = result.find((m) => m.id === 'M9')
+      expect(m9).toBeDefined()
+      expect(m9!.confidence).toBe('definite')
+      expect(m9!.matchedValue).toContain('dc:creator = Stable Diffusion')
+    })
+
+    it('does not fire when the C2PA manifest is present but dc:creator is not AI', () => {
+      const result = runAllMarkers(
+        meta({
+          xmp: { 'dc:creator': 'Jane Photographer' },
+          c2pa: {
+            container: 'app11-jumbf',
+            containerLabel: 'APP11 JUMBF',
+            fields: [],
+          },
+        }),
+      )
+      expect(result.filter((m) => m.id === 'M9')).toHaveLength(0)
+    })
+
+    it('does not fire on DigitalSourceType alone (no C2PA manifest)', () => {
+      const result = runAllMarkers(
+        meta({
+          xmp: { 'dc:creator': 'Midjourney' },
+          digitalSourceType:
+            'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia',
+        }),
+      )
+      expect(result.filter((m) => m.id === 'M9')).toHaveLength(0)
+      // But M3 (strong, DigitalSourceType) and M1 (strong) both fire
+      const ids = result.map((m) => m.id)
+      expect(ids).toContain('M3')
+      expect(ids).toContain('M1')
     })
   })
 

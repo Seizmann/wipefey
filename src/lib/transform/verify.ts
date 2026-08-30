@@ -67,6 +67,12 @@ export function isClean(meta: ImageMetadata): true | string {
   // PNG text chunks — any chunk = leak
   if (meta.pngChunks != null && meta.pngChunks.length > 0) return 'pngChunks'
 
+  // C2PA / Content Credentials manifest — any detection = leak
+  if (meta.c2pa != null) return 'c2pa'
+
+  // IPTC Digital Source Type (trainedAlgorithmicMedia) — presence = leak
+  if (meta.digitalSourceType != null) return 'digitalSourceType'
+
   // ICC description
   if (meta.icc?.description != null) return 'icc.description'
 

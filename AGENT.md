@@ -198,3 +198,12 @@ See `.env.example`. Only `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
 - `npm run build` — type-check + `vite build` (static SPA).
 - `npm run build:static` — also runs `scripts/prerender.mjs` to emit static route HTML.
 - Vercel: framework `vite`, output `dist`, plus the `api/` serverless function. See `vercel.json`.
+
+
+## D6: C2PA / JUMBF detection (M3/M9)
+
+- `lib/metadata/c2pa.ts` detects presence only — NOT a C2PA validator. No signature/trust checks; heuristic tool surfaces literal manifest strings only (`claim_generator`, `softwareAgent`, `model`).
+- Detection net: JPEG APP11 (`urn:uuid:c2pa` header or `jumb` box), PNG `caBX`/`caMs`/`caSt`, WebP RIFF chunk (defensive: FourCC or payload-signature match). Segment-split APP11 tolerated.
+- IPTC `trainedAlgorithmicMedia` (DigitalSourceType) is a secondary M3 channel, not its own marker; it never triggers M9.
+- `isClean()` treats `c2pa`/`digitalSourceType` as leaks — canvas re-encode drops the bytes, so the gate is the enforcement mechanism.
+- Honesty rule: absence of C2PA is never presented as evidence of non-AI origin (baked into `CAVEAT_ABSENCE` in rules.ts).

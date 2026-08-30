@@ -47,7 +47,9 @@ export interface AiHeuristicResult {
 
 const CAVEAT_ABSENCE =
   'Absence of markers does not mean this image is real — most AI tools strip ' +
-  'metadata before export. This result is heuristic, not forensic proof.'
+  'metadata before export, and provenance data such as C2PA Content ' +
+  'Credentials is frequently absent, unsigned, or removable. This result is ' +
+  'heuristic, not forensic proof.'
 
 const CAVEAT_PRESENCE =
   'These are heuristic indicators only — not forensic proof. A human could have ' +
