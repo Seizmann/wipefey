@@ -1,3 +1,5 @@
+/* Hallmark · tokens · surface: absolute · posture: restrained · theme: locked DESIGN.md (Geist) · full stamp and waivers in src/index.css */
+/* Hallmark · waive 7b · the tokens declare surface: absolute · DESIGN.md locks the Geist black and white paper; both themes pass 40 and 41 */
 /* ============================================================================
    Wipefey — Design Tokens (Tailwind v4, CSS-first)
    ----------------------------------------------------------------------------
@@ -68,6 +70,8 @@
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* Mono is the outlier face, one role: labels, data, filenames (DESIGN.md §4). */
+  --font-outlier: "Geist Mono", ui-monospace, monospace;
 
   --radius-wxs: 6px;  /* buttons, inputs, small controls */
   --radius-wsm: 8px;  /* cards, panels */

@@ -31,79 +31,82 @@ const PEOPLE = [
 export function AboutPage() {
   const meta = getRouteMeta('/about')
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
-      <Seo path={meta.path} title={meta.title} description={meta.description} />
-      <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-        About
-      </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
-        Wipefey is a free, open-source, client-side photo metadata tool: inspect
-        everything embedded in an image, get a heuristic AI-generation signal,
-        and wipe the metadata clean — without the file ever leaving your
-        browser. It is MIT-licensed and lives at{' '}
-        <a
-          href="https://wipefey.rexio.pro"
-          className="text-accent transition-colors hover:text-accent-hover"
-        >
-          wipefey.rexio.pro
-        </a>
-        .
-      </p>
+    <>
+      <header className="mx-auto max-w-3xl px-4 pt-20 pb-20 sm:px-6 md:pt-28">
+        <Seo path={meta.path} title={meta.title} description={meta.description} />
+        <h1 className="min-w-0 text-balance text-3xl font-semibold tracking-tight wrap-break-word md:text-4xl">
+          About
+        </h1>
+        <p className="mt-4 max-w-[55ch] text-pretty text-base leading-relaxed text-muted">
+          A free, open-source tool for the metadata inside photos.
+        </p>
+      </header>
 
-      <div className="mt-12 grid gap-3 sm:grid-cols-3">
-        {PEOPLE.map((p) => (
-          <a
-            key={p.name}
-            href={p.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-wsm border border-border bg-surface p-5 transition-colors hover:border-border-strong"
-          >
-            <p className="font-mono text-[11px] uppercase tracking-wide text-faint">
-              {p.role}
-            </p>
-            <p className="mt-1.5 text-base font-medium text-foreground">
-              {p.name}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{p.note}</p>
-            <p className="mt-2 font-mono text-xs text-accent">
-              {p.url.replace('https://', '')}
-            </p>
-          </a>
-        ))}
-      </div>
-
-      <div className="mt-12 flex flex-col gap-6">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight md:text-xl">
-            Open source
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-            The full source is public under the MIT license — contributions and
-            issues are welcome on GitHub at{' '}
+      <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6 md:pb-28">
+        <div className="mt-12 border-t border-border">
+          {PEOPLE.map((p) => (
             <a
-              href="https://github.com/Seizmann/wipefey"
-              className="font-mono text-accent transition-colors hover:text-accent-hover"
+              key={p.name}
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="grid gap-1 border-b border-border py-5 transition-colors hover:border-border-strong sm:grid-cols-[8rem_minmax(0,1fr)_auto] sm:items-baseline sm:gap-6"
             >
-              github.com/Seizmann/wipefey
+              <span className="font-mono text-xs text-faint">{p.role}</span>
+              <span className="min-w-0">
+                <span className="text-base font-medium text-foreground">
+                  {p.name}
+                </span>
+                <span className="mt-1 block text-sm leading-relaxed text-muted">
+                  {p.note}
+                </span>
+              </span>
+              <span className="font-mono text-xs text-accent">
+                {p.url.replace('https://', '')}
+              </span>
             </a>
-            .
-          </p>
+          ))}
         </div>
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight md:text-xl">
-            What's next
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-            v2 is scoped as a deeper "AI Interrogate" analysis feature. The
-            current roadmap lives in the repository's{' '}
-            <code className="rounded-wxs bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-foreground">
-              ROADMAP.md
-            </code>
-            .
-          </p>
+
+        <div className="mt-12 flex flex-col gap-6">
+          <div>
+            <h2 className="text-balance text-xl font-semibold tracking-tight md:text-2xl">
+              Open source
+            </h2>
+            <p className="mt-2 max-w-[55ch] text-pretty text-sm leading-relaxed text-muted">
+              The full source is public under the MIT license and runs entirely
+              in the browser. The site lives at{' '}
+              <a
+                href="https://wipefey.rexio.pro"
+                className="text-accent transition-colors hover:text-accent-hover"
+              >
+                wipefey.rexio.pro
+              </a>
+              ; contributions and issues are welcome on GitHub at{' '}
+              <a
+                href="https://github.com/Seizmann/wipefey"
+                className="font-mono text-accent transition-colors hover:text-accent-hover"
+              >
+                github.com/Seizmann/wipefey
+              </a>
+              .
+            </p>
+          </div>
+          <div>
+            <h2 className="text-balance text-xl font-semibold tracking-tight md:text-2xl">
+              What’s next
+            </h2>
+            <p className="mt-2 max-w-[55ch] text-pretty text-sm leading-relaxed text-muted">
+              v2 is scoped as a deeper “AI Interrogate” analysis feature. The
+              current roadmap lives in the repository’s{' '}
+              <code className="rounded-wxs bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-foreground">
+                ROADMAP.md
+              </code>
+              .
+            </p>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

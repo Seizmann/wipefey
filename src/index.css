@@ -1,3 +1,20 @@
+/* Hallmark · v2.0 · built: the project's own system · redesign: full · theme: locked DESIGN.md (Geist) · genre: modern-minimal · job: try · shape: feature stack · hero: Stage (/) · nav: edge-aligned bar, wordmark left, destinations right · footer: colophon line over a link row · posture: restrained · surface: absolute · signature: the tool's own metadata output, drawn from its test fixtures */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: S, a metadata panel could sit on any dev tool's page; every specimen row uses the project's own fixture values (Canon EOS R5, Stable Diffusion 3.5) that no other product has */
+/* Hallmark · waive 64 · the product is a developer tool whose locked system (DESIGN.md §4) sets Geist Mono as the label and data face · mono is the material on this page, not costume */
+/* Hallmark · waive 78 · heads pass AA in both themes and step one level at a time · the locked Geist scale (DESIGN.md §4) sets section heads at 24px */
+/* Hallmark · waive 44c · the prose pages open with a document header, not a hero · only the landing page carries a hero stage */
+/* Hallmark · dismissed 77 · the prose pages are documents: a header and one section, not a landing strip */
+/* Hallmark · waive 39b · the workbench's drop zone is a page-sized drop target, not a control · every button and link inside it stands at 32px */
+/* Hallmark · waive 79 · the workbench is an app screen whose empty state is the drop zone · results replace the blank once photos arrive */
+/* Hallmark · dropped "One tool, three jobs: inspect, signal, clean." · the three jobs now open their own sections */
+/* Hallmark · dropped "One-click clean" · the Clean section head carries it */
+/* Hallmark · dropped "Private by design" · the close keeps the privacy promise */
+/* Hallmark · reworded "See the hidden metadata in your photos. Wipe it clean — in your browser." to "See what your photos carry." · 58 names the hero budget */
+/* Hallmark · reworded "See everything inside the file" to "Everything inside the file" · 58 trims the head */
+/* Hallmark · reworded "Batch, then take it all with you" to "50 photos, one ZIP" · 58 trims the head and names the batch fact */
+/* Hallmark · reworded "What are your photos carrying?" to "See what your photos carry." · the question becomes the hero head */
+/* Hallmark · reworded "What's next" to "What’s next" · F1 names the straight quote */
+
 @import "./design/tokens.css";
 
 /* Geist font faces (self-hosted via @fontsource) */
@@ -10,12 +27,14 @@
 html {
   background-color: var(--color-bg); /* flips with .light — no theme flash */
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   @apply bg-bg text-foreground font-sans antialiased;
   margin: 0;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 * {
@@ -30,6 +49,12 @@ body {
   border-radius: 2px;
 }
 
+/* Browser surfaces take the palette (F16): selection and scrollbar. */
+::selection {
+  background: var(--w-accent-muted);
+  color: var(--color-foreground);
+}
+
 /* Scrollbar (subtle, monochrome) */
 ::-webkit-scrollbar {
   width: 10px;
@@ -41,23 +66,6 @@ body {
 }
 ::-webkit-scrollbar-track {
   background: transparent;
-}
-
-/* Hero glow — the only gradient in the product (DESIGN.md §1). Subtle radial
-   wash at the top of the Home hero; theme-aware, decorative only. */
-.hero-glow {
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(255, 255, 255, 0.07),
-    transparent 70%
-  );
-}
-.light .hero-glow {
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(0, 102, 243, 0.06),
-    transparent 70%
-  );
 }
 
 /* Respect reduced motion */

@@ -97,9 +97,9 @@ Checked against the live Geist docs before finalizing:
 | `--color-ai` | `#f85149` | `#f85149` | **dot/badge only** — AI markers found / errors |
 | `--color-unsure` | `#d29922` | `#d29922` | **dot/badge only** — inconclusive / rate-limit notices |
 
-Status colors are reserved for 8px dots and small pills. They also appear as
-*text* on small mono labels (11–12px uppercase) paired with the dot, so color is
-never the only signal.
+Status colors are reserved for 8px dots and small pills. The dot carries the
+status color; the 11px mono label beside it stays in muted text, so status is
+never color alone and the label keeps AA contrast in both themes.
 
 ---
 
@@ -120,11 +120,12 @@ never the only signal.
 | Card heading | `text-base font-medium` | feature cards |
 | Body | `text-sm md:text-base text-muted leading-relaxed` | paragraphs |
 | Small / meta | `text-xs text-muted` | helper text |
-| Label / badge | `font-mono text-[11px] uppercase tracking-wide` | status badges, section headers |
+| Label / badge | `font-mono text-[11px]` | status badges, section headers |
 | Data | `font-mono text-xs` + `.tnum` | metadata rows, sizes, counts |
 
 Rules: one `h1` per page; sentence case in prose, lowercase for workbench
-buttons (mono, terminal-flavored), uppercase only for 11px mono labels.
+buttons (mono, terminal-flavored). Labels are mono one step smaller, sentence
+case, untracked — never uppercase, never letter-spaced.
 
 ## 5. Spacing
 
@@ -183,7 +184,7 @@ All transitions: `transition-colors`, 150ms.
 
 ### Badges / status dots
 
-`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide`
+`inline-flex items-center gap-1.5 font-mono text-[11px]`
 + `size-2 rounded-full` dot: `bg-clean` / `bg-ai` / `bg-unsure` / `bg-faint`
 (idle) / `bg-accent` (in-flight). Color + label, never color alone.
 
@@ -226,8 +227,7 @@ The mark is the sensor-frame + wipe-slice + terminal-caret SVG in
   Utilities reference `var(--color-*)` via plain `@theme` — **never
   `@theme inline`**, which would inline dark values and break the flip.
 - Both themes are designed, not derived: every page is checked in dark *and*
-  light — surfaces, borders, status colors, and the hero gradient all have
-  explicit light values.
+  light. Surfaces, borders and status colors all have explicit light values.
 
 ## 11. Accessibility
 
@@ -269,7 +269,7 @@ The mark is the sensor-frame + wipe-slice + terminal-caret SVG in
 | Card heading | `text-base font-medium` | feature cards |
 | Body | `text-sm md:text-base text-muted leading-relaxed` | paragraphs |
 | Small / meta | `text-xs text-muted` | helper text |
-| Label / badge | `font-mono text-[11px] uppercase tracking-wide` | status badges, section headers |
+| Label / badge | `font-mono text-[11px]` | status badges, section headers |
 | Data | `font-mono text-xs` + `.tnum` | metadata rows, sizes, counts |
 
 Rules: one `h1` per page; sentence case for prose, lowercase for workbench
@@ -336,7 +336,7 @@ All transitions: `transition-colors` 150ms.
 
 ### Badges / status dots
 
-`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide`
+`inline-flex items-center gap-1.5 font-mono text-[11px]`
 + `size-2 rounded-full` dot: `bg-faint` (idle), `bg-accent` (in-flight),
 `bg-clean` (done / no markers), `bg-ai` (markers found / errors),
 `bg-unsure` (inconclusive / rate-limit). Color + label, never color alone.
@@ -385,8 +385,7 @@ The mark is the sensor-frame + wipe-slice + terminal-caret SVG in
   so utilities reference `var(--color-*)` and the `.light` overrides actually
   apply.
 - Both themes are designed, not derived: every page is checked in dark *and*
-  light — surfaces, borders, status colors, and the hero gradient all have
-  explicit light values.
+  light. Surfaces, borders and status colors all have explicit light values.
 
 ## 11. Accessibility
 

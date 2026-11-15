@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <p className="mt-3 text-sm text-muted">
-            Wipefey hit an unexpected error and stopped. Nothing was uploaded —
+            Wipefey hit an unexpected error and stopped. Nothing was uploaded;
             your photos never left this device. Reloading starts a clean session.
           </p>
 

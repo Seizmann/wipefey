@@ -21,10 +21,10 @@ function Section({
 }) {
   return (
     <div className="mt-10">
-      <h2 className="text-lg font-semibold tracking-tight md:text-xl">
+      <h2 className="text-balance text-xl font-semibold tracking-tight md:text-2xl">
         {title}
       </h2>
-      <div className="mt-2 flex flex-col gap-3 text-sm leading-relaxed text-muted">
+      <div className="mt-2 flex max-w-[55ch] flex-col gap-3 text-pretty text-sm leading-relaxed text-muted">
         {children}
       </div>
     </div>
@@ -34,29 +34,29 @@ function Section({
 export function PrivacyPage() {
   const meta = getRouteMeta('/privacy')
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
-      <Seo path={meta.path} title={meta.title} description={meta.description} />
-      <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-        Privacy
-      </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
-        Wipefey is built so that it physically cannot leak your photos: the
-        entire pipeline runs in your browser. This page describes exactly what
-        happens on your device and what touches a server — no boilerplate, just
-        what the code does.
-      </p>
+    <>
+      <header className="mx-auto max-w-3xl px-4 pt-20 pb-20 sm:px-6 md:pt-28">
+        <Seo path={meta.path} title={meta.title} description={meta.description} />
+        <h1 className="min-w-0 text-balance text-3xl font-semibold tracking-tight wrap-break-word md:text-4xl">
+          Privacy
+        </h1>
+        <p className="mt-4 max-w-[55ch] text-pretty text-base leading-relaxed text-muted">
+          Exactly what stays on your device, and what touches a server.
+        </p>
+      </header>
 
+      <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6 md:pb-28">
       <Section title="Your photos never leave your device">
         <p>
-          Uploaded files are read with the browser's File API and processed
-          locally — metadata extraction, the AI-marker heuristic, the canvas
+          Uploaded files are read with the browser’s File API and processed
+          locally: metadata extraction, the AI-marker heuristic, the canvas
           re-encode, and the metadata rewrite all happen in your browser tab.
           No image, thumbnail, or metadata is ever uploaded, transmitted, or
           stored server-side. There is no server-side storage of any kind.
         </p>
         <p>
           When you close the tab, everything is gone: files, extracted
-          metadata, and cleaned downloads exist only in the page's memory while
+          metadata, and cleaned downloads exist only in the page’s memory while
           you work.
         </p>
       </Section>
@@ -68,7 +68,7 @@ export function PrivacyPage() {
             POST /api/check-limit
           </code>{' '}
           request to enforce a fair-use limit (about 10 transforms per hour, per
-          IP). That request contains no file data — there is nothing in it to
+          IP). That request contains no file data; there is nothing in it to
           contain file data.
         </p>
         <p>
@@ -76,15 +76,15 @@ export function PrivacyPage() {
           of the form{' '}
           <code className="rounded-wxs bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-foreground">
             wipefey:ratelimit:&lt;hour-window&gt;:&lt;your-IP&gt;
-          </code>{' '}
-          — an IP-keyed counter and nothing else. Keys are scoped to one hour
+          </code>
+          : an IP-keyed counter and nothing else. Keys are scoped to one hour
           and expire with the window. No profile is built, no history kept, and
           your IP is used for one purpose: counting your own requests against
           your own limit.
         </p>
         <p>
           If the rate-limit service is unreachable, the check fails open and
-          cleaning proceeds anyway — a privacy tool shouldn't stop working
+          cleaning proceeds anyway; a privacy tool shouldn’t stop working
           because its counter is down.
         </p>
       </Section>
@@ -96,9 +96,9 @@ export function PrivacyPage() {
           <code className="rounded-wxs bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-foreground">
             wipefey:theme
           </code>
-          . That's it. Wipefey sets no cookies, uses no accounts, and embeds no
+          . That’s it. Wipefey sets no cookies, uses no accounts, and embeds no
           third-party analytics or advertising scripts. Fonts are self-hosted,
-          so even font requests don't leave this site.
+          so even font requests don’t leave this site.
         </p>
       </Section>
 
@@ -106,9 +106,9 @@ export function PrivacyPage() {
         <p>
           Hosting infrastructure (Vercel, which serves the static site and the
           rate-limit function) necessarily sees standard request metadata such
-          as IP addresses in its logs; that is outside Wipefey's code and
-          covered by Vercel's own policies. And of course, the repository is
-          open source — you can verify every claim on this page by reading{' '}
+          as IP addresses in its logs; that is outside Wipefey’s code and
+          covered by Vercel’s own policies. And of course, the repository is
+          open source: you can verify every claim on this page by reading{' '}
           <a
             href="https://github.com/Seizmann/wipefey"
             className="text-accent transition-colors hover:text-accent-hover"
@@ -118,6 +118,7 @@ export function PrivacyPage() {
           .
         </p>
       </Section>
-    </section>
+      </section>
+    </>
   )
 }
