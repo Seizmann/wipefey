@@ -25,12 +25,6 @@ function badgeDotClass(badge: AiBadge): string {
   return 'bg-clean'
 }
 
-function badgeTextClass(badge: AiBadge): string {
-  if (badge === 'Yes') return 'text-ai'
-  if (badge === 'Maybe') return 'text-unsure'
-  return 'text-clean'
-}
-
 function badgeLabel(badge: AiBadge): string {
   if (badge === 'Yes') return 'AI markers found'
   if (badge === 'Maybe') return 'Inconclusive'
@@ -40,7 +34,7 @@ function badgeLabel(badge: AiBadge): string {
 function BadgeIndicator({ badge }: { badge: AiBadge }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide ${badgeTextClass(badge)}`}
+      className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted"
     >
       <span className={`size-2 rounded-full ${badgeDotClass(badge)}`} aria-hidden />
       {badgeLabel(badge)}
@@ -53,7 +47,7 @@ function BadgeIndicator({ badge }: { badge: AiBadge }) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-wsm border border-border bg-surface">
-      <h4 className="border-b border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
+      <h4 className="border-b border-border px-4 py-2 font-mono text-xs text-muted">
         {title}
       </h4>
       <div className="px-4 py-2">{children}</div>
@@ -64,19 +58,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 // ─── Raw marker row (mirrors MetadataPanel.tsx §Row) ─────────────────────────
 
 function MarkerRow({ marker }: { marker: MatchedMarker }) {
-  const confidenceColor =
-    marker.confidence === 'definite'
-      ? 'text-ai'
-      : marker.confidence === 'strong'
-        ? 'text-unsure'
-        : 'text-muted'
-
   return (
     <div className="flex flex-col gap-1 py-2">
       {/* Header: id · confidence · key */}
       <dt className="flex flex-wrap items-center gap-2 font-mono text-xs">
         <span className="text-faint">{marker.id}</span>
-        <span className={`rounded-full border border-border px-1.5 py-0.5 text-[10px] ${confidenceColor}`}>
+        <span className="rounded-full border border-border px-1.5 py-0.5 text-[11px] text-muted">
           {marker.confidence}
         </span>
         <span className="text-foreground">{marker.matchedKey}</span>
@@ -95,7 +82,7 @@ function RawMarkersSection({ markers }: { markers: MatchedMarker[] }) {
   if (markers.length === 0) {
     return (
       <p className="py-2 font-mono text-xs text-faint">
-        No markers matched — nothing to display.
+        No markers matched; nothing to display.
       </p>
     )
   }
@@ -125,7 +112,7 @@ export function MarkersView({ metadata }: Props) {
   return (
     <div className="flex flex-col gap-3">
       {/* ── Badge + summary ── */}
-      <Section title="AI Generation Indicators">
+      <Section title="AI generation indicators">
         <div className="flex flex-col gap-3 py-1">
           {/* Badge */}
           <div className="flex items-center gap-3">

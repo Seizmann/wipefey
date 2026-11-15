@@ -17,22 +17,15 @@ const STATUS_LABEL: Record<FileStatus, string> = {
 
 function StatusBadge({ status }: { status: FileStatus }) {
   let dot = 'bg-faint'
-  let text = 'text-muted'
   if (status === 'analyzing' || status === 'transforming') {
     dot = 'bg-accent'
-    text = 'text-accent'
-  } else if (status === 'analyzed') {
+  } else if (status === 'analyzed' || status === 'transformed') {
     dot = 'bg-clean'
-    text = 'text-clean'
-  } else if (status === 'transformed') {
-    dot = 'bg-clean'
-    text = 'text-clean'
   } else if (status === 'error' || status === 'transform-error') {
     dot = 'bg-ai'
-    text = 'text-ai'
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide ${text}`}>
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted">
       <span className={`size-2 rounded-full ${dot}`} aria-hidden />
       {STATUS_LABEL[status]}
     </span>

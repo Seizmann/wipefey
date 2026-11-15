@@ -34,18 +34,18 @@ export function DropZone() {
         className={`flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-3 rounded-wmd border-2 border-dashed px-6 py-10 text-center transition-colors ${
           isDragging
             ? 'border-accent bg-accent-muted'
-            : 'border-border bg-surface hover:border-border-strong'
+            : 'border-border bg-surface hover:border-border-strong active:bg-surface-2'
         }`}
       >
         <Logo size={28} className="text-faint" decorative />
         <p className="text-sm font-medium text-foreground">
           Drop photos here, or <span className="text-accent">browse</span>
         </p>
-        <p className="max-w-md font-mono text-xs text-muted">
-          JPEG · PNG · WebP · HEIC — up to {MAX_FILE_COUNT} files · {formatBytes(MAX_FILE_SIZE)} each
+        <p className="max-w-md text-pretty font-mono text-xs text-muted">
+          JPEG, PNG, WebP or HEIC, up to {MAX_FILE_COUNT} files of {formatBytes(MAX_FILE_SIZE)} each
         </p>
         <p className="font-mono text-[11px] text-faint">
-          processed entirely in your browser — nothing is uploaded
+          Processed entirely in your browser. Nothing is uploaded.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export function DropZone() {
                 <span className="shrink-0 font-mono text-ai">✕</span>
                 <span className="min-w-0">
                   <span className="font-medium text-foreground">{r.name}</span>
-                  <span className="text-muted"> — {r.reason}</span>
+                  <span className="text-muted">: {r.reason}</span>
                 </span>
               </li>
             ))}

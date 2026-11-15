@@ -32,3 +32,6 @@ PROGRESS.md
 REQUIREMENT.md
 .verify/
 .prerender-tmp-*
+
+# Hallmark run records (screenshots, before/after records)
+.hallmark/

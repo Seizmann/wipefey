@@ -60,24 +60,32 @@ export function ToolPage() {
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Seo path={meta.path} title={meta.title} description={meta.description} />
       <header className="mb-8">
-        <h1 className="font-mono text-2xl font-semibold text-foreground">
+        <h1 className="min-w-0 font-mono text-2xl font-semibold text-foreground wrap-break-word">
           Inspect your photos
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          Drop photos to see the metadata hiding inside them — camera model,
-          GPS coordinates, edit dates, software tags and embedded text chunks.
-          Everything runs locally in your browser.
+        <p className="mt-2 max-w-[55ch] text-pretty text-sm text-muted">
+          Drop photos to see the metadata hiding inside them.
         </p>
       </header>
 
       <DropZone />
 
+      {files.length === 0 && (
+        <div className="mt-8 rounded-wmd border border-dashed border-border px-6 py-12 text-center">
+          <p className="font-mono text-sm text-muted">Your batch is empty.</p>
+          <p className="mx-auto mt-1 max-w-md text-pretty font-mono text-xs text-faint">
+            Drop photos above to see what they carry: every metadata field, the
+            AI-marker signal, then the clean.
+          </p>
+        </div>
+      )}
+
       {files.length > 0 && (
         <div className="mt-8">
           {/* Batch action bar */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-mono text-sm uppercase tracking-wide text-muted">
-              Batch · {files.length} / {MAX_FILE_COUNT}
+            <h2 className="font-mono text-sm text-muted">
+              batch {files.length} of {MAX_FILE_COUNT}
             </h2>
             <div className="flex flex-wrap items-center gap-2">
               {/* Phase 4: serial Transform-all — hidden at zero analyzed,

@@ -39,7 +39,7 @@ function Section({
 }) {
   return (
     <section className="rounded-wsm border border-border bg-surface">
-      <h4 className="border-b border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
+      <h4 className="border-b border-border px-4 py-2 font-mono text-xs text-muted">
         {title}
       </h4>
       <dl className="divide-y divide-border/60 px-4 py-2">{children}</dl>
@@ -214,7 +214,7 @@ export function MetadataPanel({ file }: Props) {
     <div className="flex min-w-0 flex-col gap-4">
       <div className="min-w-0 flex items-center justify-between gap-2">
         <h3 className="min-w-0 truncate font-mono text-sm text-foreground" title={file.file.name}>{file.file.name}</h3>
-        <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] uppercase text-muted">
+        <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-muted">
           {meta.format}
         </span>
       </div>
